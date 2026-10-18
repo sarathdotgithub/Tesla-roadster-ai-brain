@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Flying Tesla Has an AI Brain — Here's How It Thinks</title>
+<style>
+  :root {
+    --bg: #080a0f;
+    --bg-elevated: #10151d;
+    --card: #141b26;
+    --border: #222d3c;
+    --text: #e8eef7;
+    --muted: #8ea2ba;
+    --tesla-red: #e82127;
+    --electric: #3e6ae1;
+    --ai: #8b5cf6;
+    --ai-soft: rgba(139, 92, 246, 0.14);
+    --gas: #4fd1c5;
+    --amber: #f5a524;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: rgba(139, 92, 246, 0.35); }
+
+  /* ---------- STICKY NAV ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 22px;
+    background: rgba(8, 10, 15, 0.82);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .brand .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ai);
+    box-shadow: 0 0 12px var(--ai);
+  }
+
+  .navlinks {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .navlinks::-webkit-scrollbar { display: none; }
+
+  .navlinks a {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+    font-weight: 600;
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .navlinks a:hover { color: var(--text); border-color: var(--ai); }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    position: relative;
+    min-height: 620px;
+    display: flex;
+    align-items: center;
+    padding: 80px 24px 70px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .hero-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.38;
+    filter: saturate(0.85) contrast(1.15);
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.22), transparent 55%),
+      radial-gradient(circle at 85% 75%, rgba(232, 33, 39, 0.18), transparent 50%),
+      linear-gradient(to top, var(--bg) 6%, rgba(8, 10, 15, 0.35) 60%, rgba(0,0,0,0.55) 100%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    z-index: 1;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: #c4b5fd;
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    background: var(--ai-soft);
+    padding: 7px 16px;
+    border-radius: 999px;
+    margin-bottom: 26px;
+  }
+
+  h1 {
+    font-size: clamp(2.1rem, 6.4vw, 3.9rem);
+    line-height: 1.06;
+    letter-spacing: -0.035em;
+    font-weight: 850;
+    margin-bottom: 24px;
+  }
+
+  h1 .strike {
+    color: #5c6b7f;
+    text-decoration: line-through;
+    text-decoration-thickness: 3px;
+    text-decoration-color: var(--tesla-red);
+  }
+
+  h1 .glow {
+    background: linear-gradient(100deg, var(--ai), #c4b5fd 45%, var(--electric));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 26px rgba(139, 92, 246, 0.35));
+  }
+
+  .lede {
+    font-size: clamp(1rem, 2.4vw, 1.2rem);
+    color: #b6c6d9;
+    max-width: 640px;
+    margin-bottom: 32px;
+  }
+
+  .lede strong { color: var(--text); font-weight: 650; }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .chip {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: #cbd8e8;
+  }
+
+  .chip.hot { border-color: rgba(232, 33, 39, 0.45); color: #ff9b9e; background: rgba(232, 33, 39, 0.1); }
+  .chip.ai   { border-color: rgba(139, 92, 246, 0.45); color: #c4b5fd; background: var(--ai-soft); }
+  .chip.gas  { border-color: rgba(79, 209, 197, 0.4); color: #7fe8dd; background: rgba(79, 209, 197, 0.1); }
+
+  /* ---------- LAYOUT ---------- */
+  main {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 24px 100px;
+  }
+
+  section { padding-top: 84px; }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .section-head .num {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--ai);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    background: var(--ai-soft);
+    padding: 3px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
+  }
+
+  .section-head .num.gas  { color: var(--gas); border-color: rgba(79,209,197,0.4); background: rgba(79,209,197,0.1); }
+  .section-head .num.amb  { color: var(--amber); border-color: rgba(245,165,36,0.4); background: rgba(245,165,36,0.1); }
+  .section-head .num.red  { color: #ff7a7d; border-color: rgba(232,33,39,0.45); background: rgba(232,33,39,0.12); }
+  .section-head .num.ref  { color: #8ea2ba; border-color: var(--border); background: var(--bg-elevated); }
+
+  h2 {
+    font-size: clamp(1.45rem, 3.6vw, 2.05rem);
+    letter-spacing: -0.025em;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .section-sub {
+    color: var(--muted);
+    margin-bottom: 30px;
+    max-width: 740px;
+    font-size: 1rem;
+  }
+
+  .section-sub strong { color: var(--text); font-weight: 650; }
+
+  /* ---------- CONTRAST PANEL ---------- */
+  .contrast {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .contrast-panel {
+    border-radius: var(--radius);
+    padding: 28px 26px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .contrast-panel.viral {
+    border-color: rgba(232, 33, 39, 0.28);
+    background: linear-gradient(160deg, rgba(232, 33, 39, 0.09), transparent 70%), var(--card);
+  }
+
+  .contrast-panel.real {
+    border-color: rgba(139, 92, 246, 0.35);
+    background: linear-gradient(160deg, rgba(139, 92, 246, 0.13), transparent 70%), var(--card);
+    box-shadow: 0 20px 60px -30px rgba(139, 92, 246, 0.7);
+  }
+
+  .contrast-panel .tag {
+    display: inline-block;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 5px 11px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+
+  .viral .tag { color: #ff9b9e; background: rgba(232, 33, 39, 0.16); }
+  .real  .tag { color: #c4b5fd; background: rgba(139, 92, 246, 0.2); }
+
+  .contrast-panel h3 {
+    font-size: 1.12rem;
+    font-weight: 750;
+    margin-bottom: 14px;
+    letter-spacing: -0.015em;
+  }
+
+  .contrast-panel ul {
+    list-style: none;
+    display: grid;
+    gap: 10px;
+  }
+
+  .contrast-panel li {
+    font-size: 0.93rem;
+    color: var(--muted);
+    padding-left: 20px;
+    position: relative;
+  }
+
+  .contrast-panel li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 9px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.6;
+  }
+
+  .viral li::before { background: var(--tesla-red); }
+  .real  li::before { background: var(--ai); }
+
+  .contrast-panel li strong { color: var(--text); font-weight: 650; }
+
+  /* ---------- CARDS ---------- */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px 24px;
+    position: relative;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 18px 44px -24px rgba(139, 92, 246, 0.8);
+  }
+
+  .card.gas:hover  { border-color: rgba(79, 209, 197, 0.5); box-shadow: 0 18px 44px -24px rgba(79, 209, 197, 0.7); }
+  .card.amb:hover  { border-color: rgba(245, 165, 36, 0.5); box-shadow: 0 18px 44px -24px rgba(245, 165, 36, 0.7); }
+
+  .icon {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    margin-bottom: 18px;
+    background: var(--ai-soft);
+    border: 1px solid rgba(139, 92, 246, 0.34);
+  }
+
+  .icon svg {
+    width: 22px; height: 22px;
+    stroke: var(--ai);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .card.gas .icon { background: rgba(79, 209, 197, 0.13); border-color: rgba(79, 209, 197, 0.32); }
+  .card.gas .icon svg { stroke: var(--gas); }
+  .card.amb .icon { background: rgba(245, 165, 36, 0.13); border-color: rgba(245, 165, 36, 0.32); }
+  .card.amb .icon svg { stroke: var(--amber); }
+
+  .card h3 {
+    font-size: 1.04rem;
+    font-weight: 750;
+    margin-bottom: 9px;
+    letter-spacing: -0.01em;
+  }
+
+  .card p {
+    color: var(--muted);
+    font-size: 0.93rem;
+  }
+
+  .card p strong { color: var(--text); font-weight: 650; }
+
+  /* ---------- STAT STRIP ---------- */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-top: 26px;
+  }
+
+  .stat {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ai), var(--electric));
+  }
+
+  .stat .value {
+    font-size: clamp(1.35rem, 3.4vw, 1.75rem);
+    font-weight: 850;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    background: linear-gradient(100deg, #fff, #b9a6ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 6px;
+  }
+
+  .stat .label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  /* ---------- SENSOR FUSION DIAGRAM ---------- */
+  .diagram-wrap {
+    margin-top: 34px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 20px 18px;
+    overflow: hidden;
+  }
+
+  .diagram-caption {
+    text-align: center;
+    font-size: 0.76rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b7f99;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  .fusion-svg { width: 100%; height: auto; display: block; }
+
+  .fusion-svg .node-box {
+    fill: #131b26;
+    stroke: #2b3a4d;
+    stroke-width: 1.5;
+  }
+  .fusion-svg .node-box.left  { stroke: rgba(62, 106, 225, 0.6); }
+  .fusion-svg .node-box.right { stroke: rgba(79, 209, 197, 0.55); }
+
+  .fusion-svg .node-text {
+    fill: #cfdae7;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    text-anchor: middle;
+  }
+
+  .fusion-svg .core {
+    fill: url(#coreGrad);
+    stroke: rgba(139, 92, 246, 0.8);
+    stroke-width: 1.5;
+  }
+
+  .fusion-svg .core-text {
+    fill: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-anchor: middle;
+    font-family: inherit;
+  }
+
+  .fusion-svg .core-sub {
+    fill: #d7ccff;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-anchor: middle;
+    font-family: inherit;
+  }
+
+  .fusion-svg .flow {
+    fill: none;
+    stroke: var(--electric);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 7 9;
+    animation: dashFlow 1.1s linear infinite;
+  }
+
+  .fusion-svg .flow.out {
+    stroke: var(--gas);
+    animation-duration: 1.4s;
+  }
+
+  @keyframes dashFlow {
+    to { stroke-dashoffset: -32; }
+  }
+
+  .fusion-svg .pulse-ring {
+    fill: none;
+    stroke: rgba(139, 92, 246, 0.55);
+    stroke-width: 1.5;
+    animation: ringPulse 2.2s ease-out infinite;
+    transform-origin: 320px 160px;
+  }
+
+  @keyframes ringPulse {
+    0%   { transform: scale(0.85); opacity: 0.9; }
+    100% { transform: scale(1.5);  opacity: 0; }
+  }
+
+  /* ---------- THRUSTER DIAGRAM ---------- */
+  .thruster-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 220px;
+    margin: 0 auto;
+  }
+
+  .copv {
+    width: 104px; height: 104px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #333b4a, #0b0f16 70%);
+    border: 3px solid #2a3444;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 0 30px rgba(79, 209, 197, 0.18);
+    display: grid; place-items: center;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: #7fe8dd;
+    text-transform: uppercase;
+    font-weight: 800;
+    position: relative;
+    z-index: 2;
+  }
+
+  .copv-label {
+    font-size: 0.66rem;
+    color: var(--muted);
+    margin: 10px 0 0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .pipe {
+    width: 6px; height: 64px;
+    background: linear-gradient(to bottom, #2a3444, var(--gas));
+    border-radius: 3px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .pipe::after {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: 3px;
+    background: linear-gradient(to bottom, transparent, rgba(79, 209, 197, 0.85), transparent);
+    background-size: 100% 200%;
+    animation: gasFlow 1.3s linear infinite;
+  }
+
+  @keyframes gasFlow {
+    0%   { background-position: 0 -64px; }
+    100% { background-position: 0 64px; }
+  }
+
+  .nozzle-row {
+    display: flex;
+    gap: 26px;
+    margin-top: 4px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .nozzle {
+    width: 30px; height: 44px;
+    background: linear-gradient(to bottom, #2a3444, #1a222e);
+    border-radius: 0 0 50% 50%;
+    border: 2px solid #3a4a5e;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nozzle::after {
+    content: "";
+    position: absolute;
+    top: -12px; left: 50%;
+    transform: translateX(-50%);
+    width: 5px; height: 24px;
+    background: var(--gas);
+    border-radius: 3px;
+    opacity: 0;
+    animation: pulse 1.1s ease-in-out infinite;
+  }
+
+  .nozzle:nth-child(2)::after { animation-delay: 0.35s; }
+
+  @keyframes pulse {
+    0%   { opacity: 0;    transform: translateX(-50%) scaleY(0.5); }
+    50%  { opacity: 0.95; transform: translateX(-50%) scaleY(1.6); }
+    100% { opacity: 0;    transform: translateX(-50%) scaleY(0.5); }
+  }
+
+  .nozzle-label {
+    font-size: 0.58rem;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  /* ---------- INVERTED CAR / SUCTION ---------- */
+  .suction-wrap {
+    margin-top: 34px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 30px 20px 18px;
+    overflow: hidden;
+  }
+
+  .inverted-scene {
+    position: relative;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ceiling-bar {
+    width: 78%;
+    max-width: 420px;
+    height: 10px;
+    background: linear-gradient(90deg, #1a222e, #3a4a5e 50%, #1a222e);
+    border-radius: 5px;
+    box-shadow: 0 3px 14px rgba(79, 209, 197, 0.15);
+    position: relative;
+    z-index: 2;
+  }
+
+  .ceiling-bar::after {
+    content: "";
+    position: absolute;
+    top: 100%; left: 8%; right: 8%;
+    height: 8px;
+    background: linear-gradient(to bottom, rgba(79, 209, 197, 0.35), transparent);
+    border-radius: 0 0 8px 8px;
+  }
+
+  .inverted-car {
+    width: 132px;
+    height: 54px;
+    background: linear-gradient(160deg, #ff3b40, var(--tesla-red));
+    border-radius: 4px 4px 12px 12px;
+    position: relative;
+    margin-top: 16px;
+    z-index: 1;
+    animation: hoverShake 2.6s ease-in-out infinite;
+    box-shadow: 0 -6px 26px rgba(232, 33, 39, 0.28), inset 0 3px 8px rgba(0,0,0,0.25);
+  }
+
+  @keyframes hoverShake {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-2px); }
+  }
+
+  .inv-wheel {
+    position: absolute;
+    top: -18px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #0d1117;
+    border: 3px solid #3a4a5e;
+    box-shadow: inset 0 0 0 2px #1a222e, 0 -2px 8px rgba(79, 209, 197, 0.2);
+    z-index: 3;
+  }
+
+  .inv-wheel-left  { left: 16px; }
+  .inv-wheel-right { right: 16px; }
+
+  .suction-force {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    z-index: 0;
+  }
+
+  .suction-force span {
+    width: 4px;
+    height: 14px;
+    border-radius: 2px;
+    background: linear-gradient(to top, transparent, var(--gas));
+    animation: forcePulse 1.5s ease-in-out infinite;
+  }
+
+  .suction-force span:nth-child(2) { height: 18px; animation-delay: 0.2s; }
+  .suction-force span:nth-child(3) { animation-delay: 0.4s; }
+  .suction-force span:nth-child(4) { height: 16px; animation-delay: 0.6s; }
+
+  @keyframes forcePulse {
+    0%, 100% { opacity: 0.15; transform: scaleY(0.5); }
+    50%      { opacity: 1;    transform: scaleY(1); }
+  }
+
+  /* ---------- TWO SYSTEMS COMPARISON ---------- */
+  .system-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 26px;
+  }
+
+  .system-panel {
+    border-radius: var(--radius);
+    padding: 26px 24px;
+    border: 1px solid var(--border);
+    background: var(--card);
+  }
+
+  .system-panel.thrust {
+    border-color: rgba(232, 33, 39, 0.3);
+    background: linear-gradient(160deg, rgba(232, 33, 39, 0.08), transparent 70%), var(--card);
+  }
+
+  .system-panel.suction {
+    border-color: rgba(79, 209, 197, 0.35);
+    background: linear-gradient(160deg, rgba(79, 209, 197, 0.1), transparent 70%), var(--card);
+  }
+
+  .system-tag {
+    display: inline-block;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 5px 11px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+  }
+
+  .thrust .system-tag  { color: #ff9b9e; background: rgba(232, 33, 39, 0.16); }
+  .suction .system-tag { color: #7fe8dd; background: rgba(79, 209, 197, 0.16); }
+
+  .system-panel h3 {
+    font-size: 1.08rem;
+    font-weight: 750;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .system-panel ul {
+    list-style: none;
+    display: grid;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .system-panel li {
+    font-size: 0.9rem;
+    color: var(--muted);
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .system-panel li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 8px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .thrust li::before  { background: var(--tesla-red); }
+  .suction li::before { background: var(--gas); }
+
+  .system-verb {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 650;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .thrust .system-verb  { color: #ff9b9e; }
+  .suction .system-verb { color: #7fe8dd; }
+
+  .precedent-note {
+    margin-top: 22px;
+    padding: 20px 24px;
+    background: rgba(79, 209, 197, 0.06);
+    border: 1px solid rgba(79, 209, 197, 0.22);
+    border-left: 3px solid var(--gas);
+    border-radius: 0 12px 12px 0;
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  .precedent-note strong { color: #7fe8dd; }
+
+  /* ---------- JUMP ANIMATION ---------- */
+  .jump-wrap {
+    margin-top: 34px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 24px 14px;
+    overflow: hidden;
+  }
+
+  .jump-scene {
+    position: relative;
+    height: 170px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .car {
+    width: 118px; height: 48px;
+    background: linear-gradient(160deg, #ff3b40, var(--tesla-red));
+    border-radius: 10px 10px 4px 4px;
+    position: relative;
+    animation: jump 3.2s ease-in-out infinite;
+    box-shadow: 0 12px 32px rgba(232, 33, 39, 0.35);
+  }
+
+  .car::before {
+    content: "";
+    position: absolute;
+    top: -17px; left: 18px;
+    width: 40px; height: 19px;
+    background: #12161d;
+    border-radius: 8px 8px 0 0;
+    border: 2px solid #2b3a4d;
+  }
+
+  .car::after {
+    content: "";
+    position: absolute;
+    bottom: -8px; left: 10px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #111;
+    border: 2px solid #3a4a5e;
+    box-shadow: 70px 0 0 #111, 70px 0 0 2px #3a4a5e;
+  }
+
+  @keyframes jump {
+    0%, 100% { transform: translateY(0); }
+    18%      { transform: translateY(-4px); }
+    40%      { transform: translateY(-72px); }
+    62%      { transform: translateY(-72px); }
+    82%      { transform: translateY(-4px); }
+  }
+
+  .obstacle-row {
+    display: flex;
+    gap: 18px;
+    align-items: flex-end;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .obstacle {
+    width: 30px; height: 22px;
+    background: #2a3444;
+    border-radius: 4px 4px 0 0;
+    opacity: 0.55;
+  }
+
+  .obstacle.tall { height: 34px; }
+
+  .ground {
+    height: 2px;
+    background: var(--border);
+    margin-top: 10px;
+  }
+
+  /* ---------- WARN CARDS ---------- */
+  .warn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
+    gap: 16px;
+  }
+
+  .warn {
+    background: linear-gradient(160deg, rgba(245, 165, 36, 0.09), rgba(245, 165, 36, 0.02));
+    border: 1px solid rgba(245, 165, 36, 0.3);
+    border-radius: var(--radius);
+    padding: 26px 24px;
+  }
+
+  .warn .icon { background: rgba(245, 165, 36, 0.14); border-color: rgba(245, 165, 36, 0.34); }
+  .warn .icon svg { stroke: var(--amber); }
+
+  .warn h3 {
+    font-size: 1.02rem;
+    font-weight: 750;
+    margin-bottom: 8px;
+    color: #ffd08a;
+  }
+
+  .warn p { font-size: 0.93rem; color: var(--muted); }
+  .warn p strong { color: #ffd08a; font-weight: 650; }
+
+  /* ---------- SUMMARY / TAKEAWAY ---------- */
+  .summary {
+    margin-top: 84px;
+    padding: 44px 34px;
+    border-radius: 20px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(139, 92, 246, 0.28), transparent 55%),
+      radial-gradient(circle at 92% 100%, rgba(232, 33, 39, 0.2), transparent 55%),
+      var(--bg-elevated);
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .summary .kicker {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: #c4b5fd;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .summary h2 { margin-bottom: 16px; }
+
+  .summary p {
+    color: #b6c6d9;
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 1.03rem;
+  }
+
+  .summary p strong { color: var(--text); font-weight: 700; }
+
+  .takeaway {
+    margin-top: 30px;
+    text-align: left;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ai);
+    border-radius: 12px;
+    padding: 22px 24px;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .takeaway .label {
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: #7fe8dd;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .takeaway p {
+    font-size: 0.94rem;
+    color: #cfdae7;
+    margin-bottom: 10px;
+  }
+
+  .takeaway p:last-child { margin-bottom: 0; }
+
+  .takeaway .hash {
+    color: var(--electric);
+    font-weight: 600;
+    font-size: 0.86rem;
+  }
+
+  /* ---------- REFERENCES ---------- */
+  .ref-list {
+    display: grid;
+    gap: 14px;
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  .ref-item {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .ref-item:hover {
+    border-color: rgba(62, 106, 225, 0.45);
+    transform: translateX(3px);
+  }
+
+  .ref-item .source {
+    font-size: 0.95rem;
+    font-weight: 750;
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .ref-item .source:hover {
+    color: var(--electric);
+    text-decoration: underline;
+  }
+
+  .ref-item .source .arrow {
+    font-size: 0.78rem;
+    color: var(--electric);
+    margin-left: 6px;
+    opacity: 0.7;
+  }
+
+  .ref-item .desc { margin-top: 4px; }
+
+  .ref-item a.url {
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--electric);
+    text-decoration: none;
+    font-size: 0.83rem;
+    font-weight: 600;
+    word-break: break-all;
+    transition: color 0.2s ease;
+  }
+
+  .ref-item a.url:hover {
+    color: #7fa2ff;
+    text-decoration: underline;
+  }
+
+  .ref-note {
+    font-size: 0.82rem;
+    color: #63768c;
+    margin-top: 8px;
+    padding: 16px 20px;
+    border-left: 3px solid var(--border);
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 0 10px 10px 0;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 34px 24px;
+    text-align: center;
+    color: #63768c;
+    font-size: 0.82rem;
+    line-height: 1.7;
+  }
+
+  footer a { color: var(--electric); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ---------- RESPONSIVE / MOTION ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+    html { scroll-behavior: auto; }
+  }
+
+  @media (max-width: 720px) {
+    .contrast { grid-template-columns: 1fr; }
+    .system-split { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 560px) {
+    .hero { min-height: 520px; padding: 60px 20px 50px; }
+    main { padding-bottom: 70px; }
+    section { padding-top: 60px; }
+    .summary { padding: 32px 20px; }
+    .jump-scene { height: 130px; }
+    .car { width: 88px; height: 36px; }
+    .car::after { box-shadow: 50px 0 0 #111, 50px 0 0 2px #3a4a5e; }
+    .navlinks { gap: 14px; }
+    .brand span.full { display: none; }
+    .inverted-car { width: 110px; height: 46px; }
+    .inv-wheel { width: 18px; height: 18px; top: -15px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= STICKY NAV ================= -->
+<div class="topbar">
+  <div class="brand">
+    <span class="dot"></span>
+    <span class="full">Tesla Roadster</span> · The AI Brain
+  </div>
+  <nav class="navlinks">
+    <a href="#contrast">The Real Story</a>
+    <a href="#brain">AI Brain</a>
+    <a href="#muscles">Hardware</a>
+    <a href="#inverted">Suction Grip</a>
+    <a href="#nerves">IoT</a>
+    <a href="#efficiency">Efficiency</a>
+    <a href="#recap">Recap</a>
+    <a href="#references">References</a>
+  </nav>
+</div>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <img class="hero-img" src="https://i.gzn.jp/img/2026/10/16/tesla-unveils-new-roadster-rocket/00.jpg" alt="Tesla Roadster Rocket variant at launch event">
+  <div class="hero-inner">
+    <span class="eyebrow">● Everyone's talking about the jump</span>
+    <h1>
+      Everyone Saw It <span class="strike">Fly</span>.<br>
+      Nobody Saw the <span class="glow">AI Brain</span>.
+    </h1>
+    <p class="lede">
+      The Roadster's mid-air barrel roll went viral. But the real breakthrough isn't the thrusters —
+      it's the <strong>AI control system</strong> deciding, in milliseconds, how and when to fire them.
+      Here's the tech stack almost nobody is talking about.
+    </p>
+    <div class="chip-row">
+      <span class="chip ai">AI sensor fusion</span>
+      <span class="chip gas">Cold-gas pneumatics</span>
+      <span class="chip gas">2G suction grip</span>
+      <span class="chip">10 thrusters</span>
+      <span class="chip hot">Not road-legal</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= CONTRAST ================= -->
+  <section id="contrast">
+    <div class="section-head">
+      <span class="num red">00</span>
+      <h2>The Story Everyone Missed</h2>
+    </div>
+    <p class="section-sub">
+      The clip lasted seconds. The engineering behind it is the part worth studying.
+    </p>
+
+    <div class="contrast">
+      <div class="contrast-panel viral">
+        <span class="tag">What went viral</span>
+        <h3>The jump</h3>
+        <ul>
+          <li>A car <strong>leaping over parked cars</strong></li>
+          <li>A mid-air <strong>barrel roll</strong></li>
+          <li>“Tesla built a flying car”</li>
+          <li>Three seconds of spectacle</li>
+        </ul>
+      </div>
+
+      <div class="contrast-panel real">
+        <span class="tag">What actually matters</span>
+        <h3>The brain</h3>
+        <ul>
+          <li>An <strong>AI controller</strong> fusing sensor data in real time</li>
+          <li><strong>Millisecond-level</strong> valve and actuator commands</li>
+          <li>Seamless handoff: <strong>drive → suction → thrust → land</strong></li>
+          <li>A template for <strong>Physical AI</strong> — intelligence controlling hardware</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= AI BRAIN ================= -->
+  <section id="brain">
+    <div class="section-head">
+      <span class="num">01</span>
+      <h2>The AI Brain: Sensor Fusion &amp; Real-Time Control</h2>
+    </div>
+    <p class="section-sub">
+      The car has no pilot. An <strong>AI control unit</strong> reads speed, steering angle, brake state and
+      autonomous-driving sensors to build a live picture of the vehicle and its surroundings.
+    </p>
+
+    <div class="card-grid">
+      <article class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.2"/>
+            <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+            <path d="M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>
+          </svg>
+        </div>
+        <h3>Sensor Fusion</h3>
+        <p>
+          One unified model of the car's state, built from many inputs. The AI resolves conflicting
+          signals and decides what the vehicle is <strong>actually doing</strong> mid-air.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5l3.5 2"/>
+          </svg>
+        </div>
+        <h3>Split-Second Decisions</h3>
+        <p>
+          Humans can't manage G-forces and attitude drift in real time. The AI decides
+          <strong>when to fire</strong> and <strong>how hard</strong> — thousands of times faster.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 12h6l2-6 3 12 2-6h3"/>
+          </svg>
+        </div>
+        <h3>Autopilot for the Flight Phase</h3>
+        <p>
+          Think of it as an <strong>autopilot for the jump</strong>: it stabilizes the car, holds
+          attitude, and hands control back to the driver for landing.
+        </p>
+      </article>
+    </div>
+
+    <!-- Sensor fusion diagram -->
+    <div class="diagram-wrap">
+      <svg class="fusion-svg" viewBox="0 0 640 320" role="img" aria-label="Diagram: sensors feed an AI core, which commands actuators">
+        <defs>
+          <linearGradient id="coreGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#8b5cf6"/>
+            <stop offset="100%" stop-color="#3e6ae1"/>
+          </linearGradient>
+        </defs>
+
+        <!-- pulse ring -->
+        <rect class="pulse-ring" x="262" y="112" width="116" height="96" rx="18"/>
+
+        <!-- left sensors -->
+        <rect class="node-box left" x="18" y="34" width="132" height="42" rx="10"/>
+        <text class="node-text" x="84" y="60">Speed sensors</text>
+
+        <rect class="node-box left" x="18" y="139" width="132" height="42" rx="10"/>
+        <text class="node-text" x="84" y="165">Steering angle</text>
+
+        <rect class="node-box left" x="18" y="244" width="132" height="42" rx="10"/>
+        <text class="node-text" x="84" y="270">IMU / gyro</text>
+
+        <!-- flows in -->
+        <path class="flow" d="M150 55 C 215 55, 225 160, 268 160"/>
+        <path class="flow" d="M150 160 L 268 160"/>
+        <path class="flow" d="M150 265 C 215 265, 225 160, 268 160"/>
+
+        <!-- AI core -->
+        <rect class="core" x="268" y="118" width="104" height="84" rx="16"/>
+        <text class="core-text" x="320" y="156">AI</text>
+        <text class="core-sub" x="320" y="176">FUSION CORE</text>
+
+        <!-- flows out -->
+        <path class="flow out" d="M372 160 C 415 160, 425 55, 488 55"/>
+        <path class="flow out" d="M372 160 L 488 160"/>
+        <path class="flow out" d="M372 160 C 415 160, 425 265, 488 265"/>
+
+        <!-- right actuators -->
+        <rect class="node-box right" x="490" y="34" width="132" height="42" rx="10"/>
+        <text class="node-text" x="556" y="60">Thrusters</text>
+
+        <rect class="node-box right" x="490" y="139" width="132" height="42" rx="10"/>
+        <text class="node-text" x="556" y="165">Actuators</text>
+
+        <rect class="node-box right" x="490" y="244" width="132" height="42" rx="10"/>
+        <text class="node-text" x="556" y="270">Suction fans</text>
+      </svg>
+      <div class="diagram-caption">Sensors in → AI decides → hardware acts</div>
+    </div>
+  </section>
+
+  <!-- ================= MUSCLES ================= -->
+  <section id="muscles">
+    <div class="section-head">
+      <span class="num gas">02</span>
+      <h2>The Muscles: Pneumatics, Actuators &amp; Thrusters</h2>
+    </div>
+    <p class="section-sub">
+      The AI's decisions are useless without hardware that can execute them <strong>precisely</strong>.
+    </p>
+
+    <div class="card-grid">
+      <article class="card gas">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2v6"/>
+            <path d="M8 8h8l-1.5 6h-5L8 8z"/>
+            <path d="M9.5 14 8 21M14.5 14 16 21"/>
+          </svg>
+        </div>
+        <h3>Cold-Gas Thrusters (Pneumatics)</h3>
+        <p>
+          No combustion. <strong>Compressed air</strong> from carbon-fibre tanks at up to
+          <strong>10,000 PSI</strong> is released through nozzles. Pure pneumatics — repeatable and controllable.
+        </p>
+      </article>
+
+      <article class="card amb">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13l0-8z"/>
+          </svg>
+        </div>
+        <h3>Electric Micro-Actuators</h3>
+        <p>
+          Valve control comes from <strong>electric actuators</strong> (some derived from Tesla's Optimus
+          program), enabling <strong>millisecond-level</strong> changes in thrust force and direction.
+        </p>
+      </article>
+
+      <article class="card gas">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="8"/>
+            <path d="M12 4v3M12 17v3M4 12h3M17 12h3"/>
+            <circle cx="12" cy="12" r="2.4"/>
+          </svg>
+        </div>
+        <h3>Underbody Suction Fans</h3>
+        <p>
+          High-power electric turbines create a vacuum beneath the car, generating up to
+          <strong>2G of downforce</strong> — enough to stick it to a surface instead of falling off.
+        </p>
+      </article>
+    </div>
+
+    <!-- Thruster diagram -->
+    <div class="diagram-wrap">
+      <div class="thruster-diagram">
+        <div class="copv">COPV</div>
+        <div class="copv-label">High-pressure tank</div>
+        <div class="pipe"></div>
+        <div class="nozzle-row">
+          <div>
+            <div class="nozzle"></div>
+            <div class="nozzle-label">Nozzle</div>
+          </div>
+          <div>
+            <div class="nozzle"></div>
+            <div class="nozzle-label">Nozzle</div>
+          </div>
+        </div>
+      </div>
+      <div class="diagram-caption">Stored gas → valve → thrust</div>
+    </div>
+  </section>
+
+  <!-- ================= INVERTED DRIVE (NEW) ================= -->
+  <section id="inverted">
+    <div class="section-head">
+      <span class="num gas">03</span>
+      <h2>Why It Doesn't Fall: The Suction Fan System</h2>
+    </div>
+    <p class="section-sub">
+      The upside-down drive is a <strong>separate trick</strong> from the thrusters. It's not ballistic —
+      it's <strong>active aerodynamic adhesion</strong>. The car literally vacuums itself to the surface,
+      creating an artificial gravity stronger than Earth's.
+    </p>
+
+    <div class="card-grid">
+      <article class="card gas">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 3v18M3 12h18"/>
+            <circle cx="12" cy="12" r="3.5"/>
+          </svg>
+        </div>
+        <h3>Air Extraction</h3>
+        <p>
+          Fans underneath the chassis pull air out of the gap between the car and the road, then
+          expel it out the back. The gap becomes a <strong>low-pressure zone</strong>.
+        </p>
+      </article>
+
+      <article class="card gas">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v12"/>
+            <path d="M7 10l5 5 5-5"/>
+            <path d="M4 20h16"/>
+          </svg>
+        </div>
+        <h3>Pressure Difference</h3>
+        <p>
+          Normal atmospheric pressure above, near-vacuum below. The car is
+          <strong>physically pushed down</strong> onto the surface — and stays there even when inverted.
+        </p>
+      </article>
+
+      <article class="card gas">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 18V6M20 18V6M4 12h16"/>
+            <path d="M9 9l3-3 3 3M9 15l3 3 3-3"/>
+          </svg>
+        </div>
+        <h3>Up to 2G of Downforce</h3>
+        <p>
+          The system generates roughly <strong>double the car's weight</strong> in downforce —
+          over 4,700 kg at peak — enough to overcome gravity entirely.
+        </p>
+      </article>
+    </div>
+
+    <!-- Inverted car visual -->
+    <div class="suction-wrap">
+      <div class="inverted-scene">
+        <div class="ceiling-bar"></div>
+        <div class="inverted-car">
+          <div class="inv-wheel inv-wheel-left"></div>
+          <div class="inv-wheel inv-wheel-right"></div>
+        </div>
+        <div class="suction-force">
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="diagram-caption">Low pressure underneath → car clings to the surface</div>
+    </div>
+
+    <!-- Two systems comparison -->
+    <div class="system-split">
+      <div class="system-panel thrust">
+        <span class="system-tag">Cold-gas thrusters</span>
+        <h3>Lift &amp; rotation</h3>
+        <ul>
+          <li>Jump off ramps</li>
+          <li>Mid-air barrel rolls</li>
+          <li>Hover and rotate</li>
+        </ul>
+        <span class="system-verb">Pushes the car away from the ground</span>
+      </div>
+      <div class="system-panel suction">
+        <span class="system-tag">Suction fans</span>
+        <h3>Grip &amp; adhesion</h3>
+        <ul>
+          <li>Stay planted in corners</li>
+          <li>Drive upside-down</li>
+          <li>Active ground-effect downforce</li>
+        </ul>
+        <span class="system-verb">Pulls the car onto the surface</span>
+      </div>
+    </div>
+
+    <div class="precedent-note">
+      <strong>Real-world precedent:</strong> The <strong>McMurtry Spéirling</strong>, an electric
+      hypercar, demonstrated the same principle in 2025 — using its “Downforce-on-Demand” fan system
+      to generate ~2,000 kg of downforce while stationary and drive inverted. Tesla's system follows
+      the same aerodynamic logic.
+    </div>
+  </section>
+
+  <!-- ================= NERVES ================= -->
+  <section id="nerves">
+    <div class="section-head">
+      <span class="num amb">04</span>
+      <h2>The Nervous System: IoT &amp; Sensor Networks</h2>
+    </div>
+    <p class="section-sub">
+      The car is a <strong>connected machine</strong>. Its sensors aren't just for driving — they're the
+      AI's eyes during the jump and the suction system's feedback loop.
+    </p>
+
+    <div class="card-grid">
+      <article class="card amb">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="2.5"/>
+            <path d="M6.5 6.5a7.8 7.8 0 0 0 0 11M17.5 6.5a7.8 7.8 0 0 1 0 11"/>
+            <path d="M3.5 3.5a12 12 0 0 0 0 17M20.5 3.5a12 12 0 0 1 0 17"/>
+          </svg>
+        </div>
+        <h3>Always-On Sensor Array</h3>
+        <p>
+          Speed, steering, brake and autonomy sensors stream continuously into the controller.
+          <strong>No data, no stable hover.</strong>
+        </p>
+      </article>
+
+      <article class="card amb">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 18V8l8-5 8 5v10"/>
+            <path d="M9 18v-5h6v5"/>
+          </svg>
+        </div>
+        <h3>Drive-by-Wire</h3>
+        <p>
+          Steer-by-wire and brake-by-wire give the AI <strong>clean electronic signals</strong> to command
+          — no mechanical lag between decision and action.
+        </p>
+      </article>
+
+      <article class="card amb">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h5l2 5 3-8 2 3h4"/>
+            <path d="M4 17h16"/>
+          </svg>
+        </div>
+        <h3>Mode Handoffs</h3>
+        <p>
+          The hard part isn't flying — it's the <strong>seamless switch</strong> between driving, suction,
+          and thrust. That orchestration is software.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= EFFICIENCY ================= -->
+  <section id="efficiency">
+    <div class="section-head">
+      <span class="num">05</span>
+      <h2>How Efficient Is AI Here? It's the Enabling Layer.</h2>
+    </div>
+    <p class="section-sub">
+      AI isn't a nice-to-have in this system. Without it, a two-ton car cannot hold attitude mid-air
+      or modulate suction for inverted driving.
+    </p>
+
+    <div class="card-grid">
+      <article class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v4M12 17v4M3 12h4M17 12h4"/>
+            <circle cx="12" cy="12" r="3.5"/>
+          </svg>
+        </div>
+        <h3>Microsecond Precision</h3>
+        <p>
+          AI reads sensors and issues commands in fractions of a second —
+          <strong>far beyond human reaction time</strong>.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1.6"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.6"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.6"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.6"/>
+          </svg>
+        </div>
+        <h3>System Orchestration</h3>
+        <p>
+          AI is the <strong>glue</strong> between pneumatics, suction fans and aerodynamics — deciding
+          which subsystem acts, and when.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 17l5-6 4 4 4-7 5 5"/>
+          </svg>
+        </div>
+        <h3>Gas Efficiency</h3>
+        <p>
+          Aerospace research shows AI controllers can hit precise pressure control with
+          <strong>under 0.1 bar steady-state error</strong> — squeezing more control from every litre of air.
+        </p>
+      </article>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="value">10</div>
+        <div class="label">Cold-gas thrusters around the body</div>
+      </div>
+      <div class="stat">
+        <div class="value">600 L</div>
+        <div class="label">Compressed air on board</div>
+      </div>
+      <div class="stat">
+        <div class="value">2G</div>
+        <div class="label">Downforce from underbody suction — enough to drive inverted</div>
+      </div>
+      <div class="stat">
+        <div class="value">&lt;0.1 bar</div>
+        <div class="label">Steady-state pressure error achieved by AI controllers</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RECAP ================= -->
+  <section id="recap">
+    <div class="section-head">
+      <span class="num red">06</span>
+      <h2>The Recap: What Was Actually Demonstrated</h2>
+    </div>
+    <p class="section-sub">
+      Two distinct systems — one for spectacle, one for grip — both orchestrated by software.
+    </p>
+
+    <div class="stunt-list" style="display:grid;gap:14px;">
+      <div style="display:flex;gap:18px;align-items:flex-start;background:var(--bg-elevated);border:1px solid var(--border);border-left:3px solid var(--tesla-red);border-radius:12px;padding:20px 22px;">
+        <span style="font-family:ui-monospace,monospace;font-size:0.8rem;font-weight:800;color:var(--tesla-red);min-width:26px;padding-top:3px;">01</span>
+        <p style="font-size:0.95rem;color:#cfdae7;">Ramp launch, mid-air barrel roll, landing on all four wheels — thrusters at work.</p>
+      </div>
+      <div style="display:flex;gap:18px;align-items:flex-start;background:var(--bg-elevated);border:1px solid var(--border);border-left:3px solid var(--tesla-red);border-radius:12px;padding:20px 22px;">
+        <span style="font-family:ui-monospace,monospace;font-size:0.8rem;font-weight:800;color:var(--tesla-red);min-width:26px;padding-top:3px;">02</span>
+        <p style="font-size:0.95rem;color:#cfdae7;">Jumping over a line of parked Teslas with a “kickflip”-style manoeuvre.</p>
+      </div>
+      <div style="display:flex;gap:18px;align-items:flex-start;background:var(--bg-elevated);border:1px solid var(--border);border-left:3px solid var(--tesla-red);border-radius:12px;padding:20px 22px;">
+        <span style="font-family:ui-monospace,monospace;font-size:0.8rem;font-weight:800;color:var(--tesla-red);min-width:26px;padding-top:3px;">03</span>
+        <p style="font-size:0.95rem;color:#cfdae7;">Hovering in place and rotating — the clearest proof of active stabilization.</p>
+      </div>
+      <div style="display:flex;gap:18px;align-items:flex-start;background:var(--bg-elevated);border:1px solid var(--border);border-left:3px solid var(--gas);border-radius:12px;padding:20px 22px;">
+        <span style="font-family:ui-monospace,monospace;font-size:0.8rem;font-weight:800;color:var(--gas);min-width:26px;padding-top:3px;">04</span>
+        <p style="font-size:0.95rem;color:#cfdae7;">Driving fully inverted without falling — suction fans generating up to 2G of adhesion.</p>
+      </div>
+    </div>
+
+    <!-- Jump animation -->
+    <div class="jump-wrap">
+      <div class="jump-scene">
+        <div class="obstacle-row">
+          <div class="obstacle"></div>
+          <div class="obstacle tall"></div>
+          <div class="obstacle"></div>
+        </div>
+        <div class="car"></div>
+      </div>
+      <div class="ground"></div>
+    </div>
+
+    <div class="warn-grid" style="margin-top:26px;">
+      <article class="warn">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v18M5 10l7-7 7 7M4 21h16"/>
+          </svg>
+        </div>
+        <h3>Brief Hops, Not Flight</h3>
+        <p>
+          The thrusters can't lift a <strong>~2-ton car</strong> for long. What you see is a
+          <strong>brief, low hop or hover</strong> — not sustained flight.
+        </p>
+      </article>
+
+      <article class="warn">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3 2.5 20h19L12 3z"/>
+            <path d="M12 9v5"/>
+            <circle cx="12" cy="17.2" r="0.6" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+        <h3>Not Road-Legal</h3>
+        <p>
+          Tesla's own configurator states the thruster package is
+          <strong>“not approved for public road use”</strong>.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= SUMMARY / TAKEAWAY ================= -->
+  <div class="summary">
+    <span class="kicker">The one-liner</span>
+    <h2>The Thruster Is the Trick. The AI Is the Point.</h2>
+    <p>
+      The Roadster's jump is a spectacular stunt — but the story worth sharing is that
+      <strong>intelligence is now doing physical work</strong>, in real time, on machines that weigh
+      two tons and leave the ground. And when it needs to stay glued to it, the same brain modulates
+      suction instead of thrust.
+    </p>
+
+    <div class="takeaway">
+      <span class="label">Copy-ready for your post</span>
+      <p><strong>The “flying” Tesla is a Physical AI story in disguise.</strong></p>
+      <p>
+        • An AI core fuses speed, steering, brake and autonomy sensor data in real time.<br>
+        • It drives <strong>10 cold-gas thrusters</strong> through electric micro-actuators — pneumatic hardware, millisecond commands.<br>
+        • Underbody suction fans add up to <strong>2G</strong> of downforce — enough to drive <em>upside-down</em>.<br>
+        • None of it works without the controller deciding <em>when</em>, <em>where</em> and <em>how hard</em> to fire.
+      </p>
+      <p>
+        The thrusters got the headlines. The AI made the manoeuvre — and the inverted drive — possible.
+      </p>
+      <p class="hash">#AI #PhysicalAI #Tesla #SpaceX #Pneumatics #IoT #Robotics #FutureOfMobility</p>
+    </div>
+  </div>
+
+  <!-- ================= REFERENCES ================= -->
+  <section id="references">
+    <div class="section-head">
+      <span class="num ref">REF</span>
+      <h2>Sources &amp; References</h2>
+    </div>
+    <p class="section-sub">
+      Key technical and event details are corroborated by on-site reporting from the October 2026 launch.
+      Every source name and link below is clickable.
+    </p>
+
+    <div class="ref-list">
+      <div class="ref-item">
+        <a class="source" href="https://techcrunch.com/2026/10/15/tesla-reveals-spacex-powered-roadster-that-flies-and-falls-with-style/" target="_blank" rel="noopener">
+          1. TechCrunch<span class="arrow">↗</span>
+        </a>
+        <div class="desc">
+          “Tesla reveals SpaceX-powered Roadster that flies and falls with style” (Oct 15, 2026).
+          Confirms the 10 cold-gas thrusters, 600L compressed air, and the three trim levels
+          (Performance, Thrust, Rocket).
+        </div>
+        <a class="url" href="https://techcrunch.com/2026/10/15/tesla-reveals-spacex-powered-roadster-that-flies-and-falls-with-style/" target="_blank" rel="noopener">https://techcrunch.com/2026/10/15/tesla-reveals-spacex-powered-roadster-that-flies-and-falls-with-style/</a>
+      </div>
+
+      <div class="ref-item">
+        <a class="source" href="https://www.engadget.com/2288437/teslas-redesigned-roadster-cold-gas-thruster-option-reservation/" target="_blank" rel="noopener">
+          2. Engadget<span class="arrow">↗</span>
+        </a>
+        <div class="desc">
+          “Tesla's redesigned Roadster has a cold-gas thruster option...” (Oct 16, 2026).
+          Confirms the all-electric actuators enabling “micro adjustments within a fraction of a second.”
+        </div>
+        <a class="url" href="https://www.engadget.com/2288437/teslas-redesigned-roadster-cold-gas-thruster-option-reservation/" target="_blank" rel="noopener">https://www.engadget.com/2288437/teslas-redesigned-roadster-cold-gas-thruster-option-reservation/</a>
+      </div>
+
+      <div class="ref-item">
+        <a class="source" href="https://avweb.com/aviation-news/tesla-roadster-takes-flight/" target="_blank" rel="noopener">
+          3. AVweb<span class="arrow">↗</span>
+        </a>
+        <div class="desc">
+          “Tesla Roadster Takes Flight” (Oct 16, 2026). Aviation-industry coverage confirming the
+          600L capacity in two pressure vessels and 10 thruster nozzles (statement from VP Lars Moravy).
+        </div>
+        <a class="url" href="https://avweb.com/aviation-news/tesla-roadster-takes-flight/" target="_blank" rel="noopener">https://avweb.com/aviation-news/tesla-roadster-takes-flight/</a>
+      </div>
+
+      <div class="ref-item">
+        <a class="source" href="https://www.torquenews.com/18013/tesla-unveiled-its-flying-08-second-spacex-roadster-fine-print-says-it-isn-t-approved-public" target="_blank" rel="noopener">
+          4. Torque News<span class="arrow">↗</span>
+        </a>
+        <div class="desc">
+          “Tesla Unveiled Its 'Flying' 0.8-Second SpaceX Roadster...” (Oct 16, 2026).
+          Source for the explicit “not approved for public road use” disclaimer from Tesla's
+          configuration portal.
+        </div>
+        <a class="url" href="https://www.torquenews.com/18013/tesla-unveiled-its-flying-08-second-spacex-roadster-fine-print-says-it-isn-t-approved-public" target="_blank" rel="noopener">https://www.torquenews.com/18013/tesla-unveiled-its-flying-08-second-spacex-roadster-fine-print-says-it-isn-t-approved-public</a>
+      </div>
+
+      <div class="ref-item">
+        <a class="source" href="https://universemagazine.com/en/tesla-roadster-learns-to-fly-how-spacex-helped-create-the-car-of-the-future/" target="_blank" rel="noopener">
+          5. Universe Magazine<span class="arrow">↗</span>
+        </a>
+        <div class="desc">
+          “Tesla Roadster learns to fly: how SpaceX helped create the car of the future” (Oct 16, 2026).
+          Explains the attitude-control principle (similar to Falcon 9's cold-gas thrusters) and notes
+          Tesla has not disclosed the precise stabilization algorithms.
+        </div>
+        <a class="url" href="https://universemagazine.com/en/tesla-roadster-learns-to-fly-how-spacex-helped-create-the-car-of-the-future/" target="_blank" rel="noopener">https://universemagazine.com/en/tesla-roadster-learns-to-fly-how-spacex-helped-create-the-car-of-the-future/</a>
+      </div>
+
+      <div class="ref-item">
+        <a class="source" href="https://www.motortrend.com/" target="_blank" rel="noopener">
+          6. MotorTrend — Optimus-derived actuators &amp; COPV pressures<span class="arrow">↗</span>
+        </a>
+        <div class="desc">
+          Technical coverage noting the actuators appear to be pulled from the Tesla Optimus robot
+          ankle program, and confirming COPVs at ~10,000 psi with nitrogen working fluid.
+        </div>
+        <a class="url" href="https://www.motortrend.com/" target="_blank" rel="noopener">https://www.motortrend.com/</a>
+      </div>
+
+      <div class="ref-item">
+        <a class="source" href="https://www.teslarati.com/" target="_blank" rel="noopener">
+          7. Teslarati — Millisecond actuator adjustments<span class="arrow">↗</span>
+        </a>
+        <div class="desc">
+          Confirms the cold-gas thruster architecture and the millisecond actuator adjustment language
+          quoted by Tesla during the launch.
+        </div>
+        <a class="url" href="https://www.teslarati.com/" target="_blank" rel="noopener">https://www.teslarati.com/</a>
+      </div>
+
+      <div class="ref-item">
+        <a class="source" href="https://www.mcmurtry.com/" target="_blank" rel="noopener">
+          8. McMurtry Spéirling — Inverted drive precedent<span class="arrow">↗</span>
+        </a>
+        <div class="desc">
+          The McMurtry Spéirling demonstrated the same active-suction principle in 2025 — generating
+          ~2,000 kg of stationary downforce using its “Downforce-on-Demand” fan system, and driving
+          inverted to prove it.
+        </div>
+        <a class="url" href="https://www.mcmurtry.com/" target="_blank" rel="noopener">https://www.mcmurtry.com/</a>
+      </div>
+
+      <div class="ref-note">
+        <strong style="color:#8ea2ba;">Note:</strong> Tesla has not publicly released the exact AI control
+        algorithms or sensor-fusion architecture used during the jump or the inverted drive. The “AI brain”
+        explanation on this page is an accurate synthesis of the system's publicly described behaviour,
+        not a disclosure of proprietary code. The inverted-drive explanation describes the confirmed
+        physical principle (active suction / low-pressure adhesion) demonstrated by Tesla and, separately,
+        by the McMurtry Spéirling.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Tesla Roadster · Cold-Gas Thrusters, Suction Grip &amp; AI Control System · Explained
+  <br>
+  Hero image: Tesla launch event coverage via Gigazine. Diagrams and animations are illustrative.
+  <br>
+  Technical details reflect reporting from the October 2026 launch event and Tesla's configurator.
+</footer>
+
+</body>
+</html>
