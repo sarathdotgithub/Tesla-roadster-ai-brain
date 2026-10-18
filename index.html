@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Flying Tesla Has an AI Brain — Here's How It Thinks</title>
+<title>The AI Side of the Tesla Roadster — How It Thinks</title>
 <style>
   :root {
     --bg: #080a0f;
@@ -71,6 +71,7 @@
   .navlinks {
     display: flex;
     gap: 18px;
+    align-items: center;
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -87,6 +88,20 @@
     transition: color 0.2s ease, border-color 0.2s ease;
   }
   .navlinks a:hover { color: var(--text); border-color: var(--ai); }
+
+  .navlinks a.repo-btn {
+    color: var(--bg);
+    background: var(--electric);
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 800;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .navlinks a.repo-btn:hover {
+    background: #5a82ff;
+    transform: translateY(-1px);
+  }
 
   /* ---------- HERO ---------- */
   .hero {
@@ -152,13 +167,6 @@
     margin-bottom: 24px;
   }
 
-  h1 .strike {
-    color: #5c6b7f;
-    text-decoration: line-through;
-    text-decoration-thickness: 3px;
-    text-decoration-color: var(--tesla-red);
-  }
-
   h1 .glow {
     background: linear-gradient(100deg, var(--ai), #c4b5fd 45%, var(--electric));
     -webkit-background-clip: text;
@@ -180,6 +188,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    align-items: center;
   }
 
   .chip {
@@ -196,6 +205,24 @@
   .chip.hot { border-color: rgba(232, 33, 39, 0.45); color: #ff9b9e; background: rgba(232, 33, 39, 0.1); }
   .chip.ai   { border-color: rgba(139, 92, 246, 0.45); color: #c4b5fd; background: var(--ai-soft); }
   .chip.gas  { border-color: rgba(79, 209, 197, 0.4); color: #7fe8dd; background: rgba(79, 209, 197, 0.1); }
+
+  .chip.hero-repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--electric);
+    color: #fff;
+    border-color: transparent;
+    text-decoration: none;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    margin-right: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .chip.hero-repo-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(62, 106, 225, 0.4);
+  }
 
   /* ---------- LAYOUT ---------- */
   main {
@@ -429,7 +456,7 @@
     line-height: 1.45;
   }
 
-  /* ---------- SENSOR FUSION DIAGRAM ---------- */
+  /* ---------- DIAGRAMS ---------- */
   .diagram-wrap {
     margin-top: 34px;
     background: var(--bg-elevated);
@@ -450,646 +477,123 @@
   }
 
   .fusion-svg { width: 100%; height: auto; display: block; }
-
-  .fusion-svg .node-box {
-    fill: #131b26;
-    stroke: #2b3a4d;
-    stroke-width: 1.5;
-  }
+  .fusion-svg .node-box { fill: #131b26; stroke: #2b3a4d; stroke-width: 1.5; }
   .fusion-svg .node-box.left  { stroke: rgba(62, 106, 225, 0.6); }
   .fusion-svg .node-box.right { stroke: rgba(79, 209, 197, 0.55); }
+  .fusion-svg .node-text { fill: #cfdae7; font-size: 12px; font-weight: 600; font-family: inherit; text-anchor: middle; }
+  .fusion-svg .core { fill: url(#coreGrad); stroke: rgba(139, 92, 246, 0.8); stroke-width: 1.5; }
+  .fusion-svg .core-text { fill: #fff; font-size: 13px; font-weight: 800; letter-spacing: 0.14em; text-anchor: middle; font-family: inherit; }
+  .fusion-svg .core-sub { fill: #d7ccff; font-size: 9px; letter-spacing: 0.1em; text-anchor: middle; font-family: inherit; }
+  .fusion-svg .flow { fill: none; stroke: var(--electric); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 7 9; animation: dashFlow 1.1s linear infinite; }
+  .fusion-svg .flow.out { stroke: var(--gas); animation-duration: 1.4s; }
+  @keyframes dashFlow { to { stroke-dashoffset: -32; } }
+  .fusion-svg .pulse-ring { fill: none; stroke: rgba(139, 92, 246, 0.55); stroke-width: 1.5; animation: ringPulse 2.2s ease-out infinite; transform-origin: 320px 160px; }
+  @keyframes ringPulse { 0% { transform: scale(0.85); opacity: 0.9; } 100% { transform: scale(1.5); opacity: 0; } }
 
-  .fusion-svg .node-text {
-    fill: #cfdae7;
-    font-size: 12px;
-    font-weight: 600;
-    font-family: inherit;
-    text-anchor: middle;
-  }
-
-  .fusion-svg .core {
-    fill: url(#coreGrad);
-    stroke: rgba(139, 92, 246, 0.8);
-    stroke-width: 1.5;
-  }
-
-  .fusion-svg .core-text {
-    fill: #fff;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-anchor: middle;
-    font-family: inherit;
-  }
-
-  .fusion-svg .core-sub {
-    fill: #d7ccff;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-anchor: middle;
-    font-family: inherit;
-  }
-
-  .fusion-svg .flow {
-    fill: none;
-    stroke: var(--electric);
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-dasharray: 7 9;
-    animation: dashFlow 1.1s linear infinite;
-  }
-
-  .fusion-svg .flow.out {
-    stroke: var(--gas);
-    animation-duration: 1.4s;
-  }
-
-  @keyframes dashFlow {
-    to { stroke-dashoffset: -32; }
-  }
-
-  .fusion-svg .pulse-ring {
-    fill: none;
-    stroke: rgba(139, 92, 246, 0.55);
-    stroke-width: 1.5;
-    animation: ringPulse 2.2s ease-out infinite;
-    transform-origin: 320px 160px;
-  }
-
-  @keyframes ringPulse {
-    0%   { transform: scale(0.85); opacity: 0.9; }
-    100% { transform: scale(1.5);  opacity: 0; }
-  }
-
-  /* ---------- THRUSTER DIAGRAM ---------- */
-  .thruster-diagram {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 220px;
-    margin: 0 auto;
-  }
-
-  .copv {
-    width: 104px; height: 104px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #333b4a, #0b0f16 70%);
-    border: 3px solid #2a3444;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 0 30px rgba(79, 209, 197, 0.18);
-    display: grid; place-items: center;
-    font-size: 0.62rem;
-    letter-spacing: 0.1em;
-    color: #7fe8dd;
-    text-transform: uppercase;
-    font-weight: 800;
-    position: relative;
-    z-index: 2;
-  }
-
-  .copv-label {
-    font-size: 0.66rem;
-    color: var(--muted);
-    margin: 10px 0 0;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-align: center;
-  }
-
-  .pipe {
-    width: 6px; height: 64px;
-    background: linear-gradient(to bottom, #2a3444, var(--gas));
-    border-radius: 3px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .pipe::after {
-    content: "";
-    position: absolute; inset: 0;
-    border-radius: 3px;
-    background: linear-gradient(to bottom, transparent, rgba(79, 209, 197, 0.85), transparent);
-    background-size: 100% 200%;
-    animation: gasFlow 1.3s linear infinite;
-  }
-
-  @keyframes gasFlow {
-    0%   { background-position: 0 -64px; }
-    100% { background-position: 0 64px; }
-  }
-
-  .nozzle-row {
-    display: flex;
-    gap: 26px;
-    margin-top: 4px;
-    position: relative;
-    z-index: 2;
-  }
-
-  .nozzle {
-    width: 30px; height: 44px;
-    background: linear-gradient(to bottom, #2a3444, #1a222e);
-    border-radius: 0 0 50% 50%;
-    border: 2px solid #3a4a5e;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .nozzle::after {
-    content: "";
-    position: absolute;
-    top: -12px; left: 50%;
-    transform: translateX(-50%);
-    width: 5px; height: 24px;
-    background: var(--gas);
-    border-radius: 3px;
-    opacity: 0;
-    animation: pulse 1.1s ease-in-out infinite;
-  }
-
+  .thruster-diagram { display: flex; flex-direction: column; align-items: center; width: 220px; margin: 0 auto; }
+  .copv { width: 104px; height: 104px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #333b4a, #0b0f16 70%); border: 3px solid #2a3444; box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 0 30px rgba(79, 209, 197, 0.18); display: grid; place-items: center; font-size: 0.62rem; letter-spacing: 0.1em; color: #7fe8dd; text-transform: uppercase; font-weight: 800; position: relative; z-index: 2; }
+  .copv-label { font-size: 0.66rem; color: var(--muted); margin: 10px 0 0; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; }
+  .pipe { width: 6px; height: 64px; background: linear-gradient(to bottom, #2a3444, var(--gas)); border-radius: 3px; position: relative; z-index: 1; }
+  .pipe::after { content: ""; position: absolute; inset: 0; border-radius: 3px; background: linear-gradient(to bottom, transparent, rgba(79, 209, 197, 0.85), transparent); background-size: 100% 200%; animation: gasFlow 1.3s linear infinite; }
+  @keyframes gasFlow { 0% { background-position: 0 -64px; } 100% { background-position: 0 64px; } }
+  .nozzle-row { display: flex; gap: 26px; margin-top: 4px; position: relative; z-index: 2; }
+  .nozzle { width: 30px; height: 44px; background: linear-gradient(to bottom, #2a3444, #1a222e); border-radius: 0 0 50% 50%; border: 2px solid #3a4a5e; position: relative; overflow: hidden; }
+  .nozzle::after { content: ""; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 5px; height: 24px; background: var(--gas); border-radius: 3px; opacity: 0; animation: pulse 1.1s ease-in-out infinite; }
   .nozzle:nth-child(2)::after { animation-delay: 0.35s; }
-
-  @keyframes pulse {
-    0%   { opacity: 0;    transform: translateX(-50%) scaleY(0.5); }
-    50%  { opacity: 0.95; transform: translateX(-50%) scaleY(1.6); }
-    100% { opacity: 0;    transform: translateX(-50%) scaleY(0.5); }
-  }
-
-  .nozzle-label {
-    font-size: 0.58rem;
-    color: var(--muted);
-    margin-top: 6px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    text-align: center;
-  }
+  @keyframes pulse { 0% { opacity: 0; transform: translateX(-50%) scaleY(0.5); } 50% { opacity: 0.95; transform: translateX(-50%) scaleY(1.6); } 100% { opacity: 0; transform: translateX(-50%) scaleY(0.5); } }
+  .nozzle-label { font-size: 0.58rem; color: var(--muted); margin-top: 6px; letter-spacing: 0.06em; text-transform: uppercase; text-align: center; }
 
   /* ---------- INVERTED CAR / SUCTION ---------- */
-  .suction-wrap {
-    margin-top: 34px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 30px 20px 18px;
-    overflow: hidden;
-  }
-
-  .inverted-scene {
-    position: relative;
-    height: 220px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .ceiling-bar {
-    width: 78%;
-    max-width: 420px;
-    height: 10px;
-    background: linear-gradient(90deg, #1a222e, #3a4a5e 50%, #1a222e);
-    border-radius: 5px;
-    box-shadow: 0 3px 14px rgba(79, 209, 197, 0.15);
-    position: relative;
-    z-index: 2;
-  }
-
-  .ceiling-bar::after {
-    content: "";
-    position: absolute;
-    top: 100%; left: 8%; right: 8%;
-    height: 8px;
-    background: linear-gradient(to bottom, rgba(79, 209, 197, 0.35), transparent);
-    border-radius: 0 0 8px 8px;
-  }
-
-  .inverted-car {
-    width: 132px;
-    height: 54px;
-    background: linear-gradient(160deg, #ff3b40, var(--tesla-red));
-    border-radius: 4px 4px 12px 12px;
-    position: relative;
-    margin-top: 16px;
-    z-index: 1;
-    animation: hoverShake 2.6s ease-in-out infinite;
-    box-shadow: 0 -6px 26px rgba(232, 33, 39, 0.28), inset 0 3px 8px rgba(0,0,0,0.25);
-  }
-
-  @keyframes hoverShake {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-2px); }
-  }
-
-  .inv-wheel {
-    position: absolute;
-    top: -18px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #0d1117;
-    border: 3px solid #3a4a5e;
-    box-shadow: inset 0 0 0 2px #1a222e, 0 -2px 8px rgba(79, 209, 197, 0.2);
-    z-index: 3;
-  }
-
-  .inv-wheel-left  { left: 16px; }
+  .suction-wrap { margin-top: 34px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 30px 20px 18px; overflow: hidden; }
+  .inverted-scene { position: relative; height: 220px; display: flex; flex-direction: column; align-items: center; }
+  .ceiling-bar { width: 78%; max-width: 420px; height: 10px; background: linear-gradient(90deg, #1a222e, #3a4a5e 50%, #1a222e); border-radius: 5px; box-shadow: 0 3px 14px rgba(79, 209, 197, 0.15); position: relative; z-index: 2; }
+  .ceiling-bar::after { content: ""; position: absolute; top: 100%; left: 8%; right: 8%; height: 8px; background: linear-gradient(to bottom, rgba(79, 209, 197, 0.35), transparent); border-radius: 0 0 8px 8px; }
+  .inverted-car { width: 132px; height: 54px; background: linear-gradient(160deg, #ff3b40, var(--tesla-red)); border-radius: 4px 4px 12px 12px; position: relative; margin-top: 16px; z-index: 1; animation: hoverShake 2.6s ease-in-out infinite; box-shadow: 0 -6px 26px rgba(232, 33, 39, 0.28), inset 0 3px 8px rgba(0,0,0,0.25); }
+  @keyframes hoverShake { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+  .inv-wheel { position: absolute; top: -18px; width: 22px; height: 22px; border-radius: 50%; background: #0d1117; border: 3px solid #3a4a5e; box-shadow: inset 0 0 0 2px #1a222e, 0 -2px 8px rgba(79, 209, 197, 0.2); z-index: 3; }
+  .inv-wheel-left { left: 16px; }
   .inv-wheel-right { right: 16px; }
-
-  .suction-force {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-    z-index: 0;
-  }
-
-  .suction-force span {
-    width: 4px;
-    height: 14px;
-    border-radius: 2px;
-    background: linear-gradient(to top, transparent, var(--gas));
-    animation: forcePulse 1.5s ease-in-out infinite;
-  }
-
+  .suction-force { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; align-items: flex-start; z-index: 0; }
+  .suction-force span { width: 4px; height: 14px; border-radius: 2px; background: linear-gradient(to top, transparent, var(--gas)); animation: forcePulse 1.5s ease-in-out infinite; }
   .suction-force span:nth-child(2) { height: 18px; animation-delay: 0.2s; }
   .suction-force span:nth-child(3) { animation-delay: 0.4s; }
   .suction-force span:nth-child(4) { height: 16px; animation-delay: 0.6s; }
-
-  @keyframes forcePulse {
-    0%, 100% { opacity: 0.15; transform: scaleY(0.5); }
-    50%      { opacity: 1;    transform: scaleY(1); }
-  }
+  @keyframes forcePulse { 0%, 100% { opacity: 0.15; transform: scaleY(0.5); } 50% { opacity: 1; transform: scaleY(1); } }
 
   /* ---------- TWO SYSTEMS COMPARISON ---------- */
-  .system-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 26px;
-  }
-
-  .system-panel {
-    border-radius: var(--radius);
-    padding: 26px 24px;
-    border: 1px solid var(--border);
-    background: var(--card);
-  }
-
-  .system-panel.thrust {
-    border-color: rgba(232, 33, 39, 0.3);
-    background: linear-gradient(160deg, rgba(232, 33, 39, 0.08), transparent 70%), var(--card);
-  }
-
-  .system-panel.suction {
-    border-color: rgba(79, 209, 197, 0.35);
-    background: linear-gradient(160deg, rgba(79, 209, 197, 0.1), transparent 70%), var(--card);
-  }
-
-  .system-tag {
-    display: inline-block;
-    font-size: 0.66rem;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    padding: 5px 11px;
-    border-radius: 6px;
-    margin-bottom: 14px;
-  }
-
-  .thrust .system-tag  { color: #ff9b9e; background: rgba(232, 33, 39, 0.16); }
+  .system-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 26px; }
+  .system-panel { border-radius: var(--radius); padding: 26px 24px; border: 1px solid var(--border); background: var(--card); }
+  .system-panel.thrust { border-color: rgba(232, 33, 39, 0.3); background: linear-gradient(160deg, rgba(232, 33, 39, 0.08), transparent 70%), var(--card); }
+  .system-panel.suction { border-color: rgba(79, 209, 197, 0.35); background: linear-gradient(160deg, rgba(79, 209, 197, 0.1), transparent 70%), var(--card); }
+  .system-tag { display: inline-block; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 11px; border-radius: 6px; margin-bottom: 14px; }
+  .thrust .system-tag { color: #ff9b9e; background: rgba(232, 33, 39, 0.16); }
   .suction .system-tag { color: #7fe8dd; background: rgba(79, 209, 197, 0.16); }
-
-  .system-panel h3 {
-    font-size: 1.08rem;
-    font-weight: 750;
-    margin-bottom: 12px;
-    letter-spacing: -0.01em;
-  }
-
-  .system-panel ul {
-    list-style: none;
-    display: grid;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
-  .system-panel li {
-    font-size: 0.9rem;
-    color: var(--muted);
-    padding-left: 18px;
-    position: relative;
-  }
-
-  .system-panel li::before {
-    content: "";
-    position: absolute;
-    left: 0; top: 8px;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-  }
-
-  .thrust li::before  { background: var(--tesla-red); }
+  .system-panel h3 { font-size: 1.08rem; font-weight: 750; margin-bottom: 12px; letter-spacing: -0.01em; }
+  .system-panel ul { list-style: none; display: grid; gap: 8px; margin-bottom: 16px; }
+  .system-panel li { font-size: 0.9rem; color: var(--muted); padding-left: 18px; position: relative; }
+  .system-panel li::before { content: ""; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; border-radius: 50%; }
+  .thrust li::before { background: var(--tesla-red); }
   .suction li::before { background: var(--gas); }
-
-  .system-verb {
-    display: block;
-    font-size: 0.82rem;
-    font-weight: 650;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-  }
-
-  .thrust .system-verb  { color: #ff9b9e; }
+  .system-verb { display: block; font-size: 0.82rem; font-weight: 650; padding-top: 12px; border-top: 1px solid var(--border); }
+  .thrust .system-verb { color: #ff9b9e; }
   .suction .system-verb { color: #7fe8dd; }
-
-  .precedent-note {
-    margin-top: 22px;
-    padding: 20px 24px;
-    background: rgba(79, 209, 197, 0.06);
-    border: 1px solid rgba(79, 209, 197, 0.22);
-    border-left: 3px solid var(--gas);
-    border-radius: 0 12px 12px 0;
-    font-size: 0.92rem;
-    color: var(--muted);
-    line-height: 1.65;
-  }
-
+  .precedent-note { margin-top: 22px; padding: 20px 24px; background: rgba(79, 209, 197, 0.06); border: 1px solid rgba(79, 209, 197, 0.22); border-left: 3px solid var(--gas); border-radius: 0 12px 12px 0; font-size: 0.92rem; color: var(--muted); line-height: 1.65; }
   .precedent-note strong { color: #7fe8dd; }
 
   /* ---------- JUMP ANIMATION ---------- */
-  .jump-wrap {
-    margin-top: 34px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 36px 24px 14px;
-    overflow: hidden;
-  }
-
-  .jump-scene {
-    position: relative;
-    height: 170px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-  }
-
-  .car {
-    width: 118px; height: 48px;
-    background: linear-gradient(160deg, #ff3b40, var(--tesla-red));
-    border-radius: 10px 10px 4px 4px;
-    position: relative;
-    animation: jump 3.2s ease-in-out infinite;
-    box-shadow: 0 12px 32px rgba(232, 33, 39, 0.35);
-  }
-
-  .car::before {
-    content: "";
-    position: absolute;
-    top: -17px; left: 18px;
-    width: 40px; height: 19px;
-    background: #12161d;
-    border-radius: 8px 8px 0 0;
-    border: 2px solid #2b3a4d;
-  }
-
-  .car::after {
-    content: "";
-    position: absolute;
-    bottom: -8px; left: 10px;
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: #111;
-    border: 2px solid #3a4a5e;
-    box-shadow: 70px 0 0 #111, 70px 0 0 2px #3a4a5e;
-  }
-
-  @keyframes jump {
-    0%, 100% { transform: translateY(0); }
-    18%      { transform: translateY(-4px); }
-    40%      { transform: translateY(-72px); }
-    62%      { transform: translateY(-72px); }
-    82%      { transform: translateY(-4px); }
-  }
-
-  .obstacle-row {
-    display: flex;
-    gap: 18px;
-    align-items: flex-end;
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .obstacle {
-    width: 30px; height: 22px;
-    background: #2a3444;
-    border-radius: 4px 4px 0 0;
-    opacity: 0.55;
-  }
-
+  .jump-wrap { margin-top: 34px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 24px 14px; overflow: hidden; }
+  .jump-scene { position: relative; height: 170px; display: flex; align-items: flex-end; justify-content: center; }
+  .car { width: 118px; height: 48px; background: linear-gradient(160deg, #ff3b40, var(--tesla-red)); border-radius: 10px 10px 4px 4px; position: relative; animation: jump 3.2s ease-in-out infinite; box-shadow: 0 12px 32px rgba(232, 33, 39, 0.35); }
+  .car::before { content: ""; position: absolute; top: -17px; left: 18px; width: 40px; height: 19px; background: #12161d; border-radius: 8px 8px 0 0; border: 2px solid #2b3a4d; }
+  .car::after { content: ""; position: absolute; bottom: -8px; left: 10px; width: 16px; height: 16px; border-radius: 50%; background: #111; border: 2px solid #3a4a5e; box-shadow: 70px 0 0 #111, 70px 0 0 2px #3a4a5e; }
+  @keyframes jump { 0%, 100% { transform: translateY(0); } 18% { transform: translateY(-4px); } 40% { transform: translateY(-72px); } 62% { transform: translateY(-72px); } 82% { transform: translateY(-4px); } }
+  .obstacle-row { display: flex; gap: 18px; align-items: flex-end; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); }
+  .obstacle { width: 30px; height: 22px; background: #2a3444; border-radius: 4px 4px 0 0; opacity: 0.55; }
   .obstacle.tall { height: 34px; }
-
-  .ground {
-    height: 2px;
-    background: var(--border);
-    margin-top: 10px;
-  }
+  .ground { height: 2px; background: var(--border); margin-top: 10px; }
 
   /* ---------- WARN CARDS ---------- */
-  .warn-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
-    gap: 16px;
-  }
-
-  .warn {
-    background: linear-gradient(160deg, rgba(245, 165, 36, 0.09), rgba(245, 165, 36, 0.02));
-    border: 1px solid rgba(245, 165, 36, 0.3);
-    border-radius: var(--radius);
-    padding: 26px 24px;
-  }
-
+  .warn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(275px, 1fr)); gap: 16px; }
+  .warn { background: linear-gradient(160deg, rgba(245, 165, 36, 0.09), rgba(245, 165, 36, 0.02)); border: 1px solid rgba(245, 165, 36, 0.3); border-radius: var(--radius); padding: 26px 24px; }
   .warn .icon { background: rgba(245, 165, 36, 0.14); border-color: rgba(245, 165, 36, 0.34); }
   .warn .icon svg { stroke: var(--amber); }
-
-  .warn h3 {
-    font-size: 1.02rem;
-    font-weight: 750;
-    margin-bottom: 8px;
-    color: #ffd08a;
-  }
-
+  .warn h3 { font-size: 1.02rem; font-weight: 750; margin-bottom: 8px; color: #ffd08a; }
   .warn p { font-size: 0.93rem; color: var(--muted); }
   .warn p strong { color: #ffd08a; font-weight: 650; }
 
   /* ---------- SUMMARY / TAKEAWAY ---------- */
-  .summary {
-    margin-top: 84px;
-    padding: 44px 34px;
-    border-radius: 20px;
-    background:
-      radial-gradient(circle at 10% 0%, rgba(139, 92, 246, 0.28), transparent 55%),
-      radial-gradient(circle at 92% 100%, rgba(232, 33, 39, 0.2), transparent 55%),
-      var(--bg-elevated);
-    border: 1px solid var(--border);
-    text-align: center;
-  }
-
-  .summary .kicker {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-weight: 800;
-    color: #c4b5fd;
-    margin-bottom: 14px;
-    display: block;
-  }
-
+  .summary { margin-top: 84px; padding: 44px 34px; border-radius: 20px; background: radial-gradient(circle at 10% 0%, rgba(139, 92, 246, 0.28), transparent 55%), radial-gradient(circle at 92% 100%, rgba(232, 33, 39, 0.2), transparent 55%), var(--bg-elevated); border: 1px solid var(--border); text-align: center; }
+  .summary .kicker { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 800; color: #c4b5fd; margin-bottom: 14px; display: block; }
   .summary h2 { margin-bottom: 16px; }
-
-  .summary p {
-    color: #b6c6d9;
-    max-width: 700px;
-    margin: 0 auto;
-    font-size: 1.03rem;
-  }
-
+  .summary p { color: #b6c6d9; max-width: 700px; margin: 0 auto; font-size: 1.03rem; }
   .summary p strong { color: var(--text); font-weight: 700; }
 
-  .takeaway {
-    margin-top: 30px;
-    text-align: left;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--ai);
-    border-radius: 12px;
-    padding: 22px 24px;
-    max-width: 720px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .takeaway .label {
-    font-size: 0.66rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    font-weight: 800;
-    color: #7fe8dd;
-    margin-bottom: 12px;
-    display: block;
-  }
-
-  .takeaway p {
-    font-size: 0.94rem;
-    color: #cfdae7;
-    margin-bottom: 10px;
-  }
-
+  .takeaway { margin-top: 30px; text-align: left; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border); border-left: 3px solid var(--ai); border-radius: 12px; padding: 22px 24px; max-width: 720px; margin-left: auto; margin-right: auto; }
+  .takeaway .label { font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 800; color: #7fe8dd; margin-bottom: 12px; display: block; }
+  .takeaway p { font-size: 0.94rem; color: #cfdae7; margin-bottom: 10px; }
   .takeaway p:last-child { margin-bottom: 0; }
-
-  .takeaway .hash {
-    color: var(--electric);
-    font-weight: 600;
-    font-size: 0.86rem;
-  }
+  .takeaway .hash { color: var(--electric); font-weight: 600; font-size: 0.86rem; }
 
   /* ---------- REFERENCES ---------- */
-  .ref-list {
-    display: grid;
-    gap: 14px;
-    font-size: 0.9rem;
-    color: var(--muted);
-    line-height: 1.65;
-  }
-
-  .ref-item {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px 22px;
-    transition: border-color 0.2s ease, transform 0.2s ease;
-  }
-
-  .ref-item:hover {
-    border-color: rgba(62, 106, 225, 0.45);
-    transform: translateX(3px);
-  }
-
-  .ref-item .source {
-    font-size: 0.95rem;
-    font-weight: 750;
-    color: var(--text);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  .ref-item .source:hover {
-    color: var(--electric);
-    text-decoration: underline;
-  }
-
-  .ref-item .source .arrow {
-    font-size: 0.78rem;
-    color: var(--electric);
-    margin-left: 6px;
-    opacity: 0.7;
-  }
-
+  .ref-list { display: grid; gap: 14px; font-size: 0.9rem; color: var(--muted); line-height: 1.65; }
+  .ref-item { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; transition: border-color 0.2s ease, transform 0.2s ease; }
+  .ref-item:hover { border-color: rgba(62, 106, 225, 0.45); transform: translateX(3px); }
+  .ref-item .source { font-size: 0.95rem; font-weight: 750; color: var(--text); text-decoration: none; transition: color 0.2s ease; }
+  .ref-item .source:hover { color: var(--electric); text-decoration: underline; }
+  .ref-item .source .arrow { font-size: 0.78rem; color: var(--electric); margin-left: 6px; opacity: 0.7; }
   .ref-item .desc { margin-top: 4px; }
-
-  .ref-item a.url {
-    display: inline-block;
-    margin-top: 8px;
-    color: var(--electric);
-    text-decoration: none;
-    font-size: 0.83rem;
-    font-weight: 600;
-    word-break: break-all;
-    transition: color 0.2s ease;
-  }
-
-  .ref-item a.url:hover {
-    color: #7fa2ff;
-    text-decoration: underline;
-  }
-
-  .ref-note {
-    font-size: 0.82rem;
-    color: #63768c;
-    margin-top: 8px;
-    padding: 16px 20px;
-    border-left: 3px solid var(--border);
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 0 10px 10px 0;
-  }
+  .ref-item a.url { display: inline-block; margin-top: 8px; color: var(--electric); text-decoration: none; font-size: 0.83rem; font-weight: 600; word-break: break-all; transition: color 0.2s ease; }
+  .ref-item a.url:hover { color: #7fa2ff; text-decoration: underline; }
+  .ref-note { font-size: 0.82rem; color: #63768c; margin-top: 8px; padding: 16px 20px; border-left: 3px solid var(--border); background: rgba(0, 0, 0, 0.25); border-radius: 0 10px 10px 0; }
 
   /* ---------- FOOTER ---------- */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 34px 24px;
-    text-align: center;
-    color: #63768c;
-    font-size: 0.82rem;
-    line-height: 1.7;
-  }
-
-  footer a { color: var(--electric); text-decoration: none; }
+  footer { border-top: 1px solid var(--border); padding: 34px 24px; text-align: center; color: #63768c; font-size: 0.82rem; line-height: 1.7; }
+  footer a { color: var(--electric); text-decoration: none; font-weight: 600; }
   footer a:hover { text-decoration: underline; }
 
   /* ---------- RESPONSIVE / MOTION ---------- */
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; animation: none !important; }
-    html { scroll-behavior: auto; }
-  }
-
-  @media (max-width: 720px) {
-    .contrast { grid-template-columns: 1fr; }
-    .system-split { grid-template-columns: 1fr; }
-  }
-
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } html { scroll-behavior: auto; } }
+  @media (max-width: 720px) { .contrast { grid-template-columns: 1fr; } .system-split { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
     .hero { min-height: 520px; padding: 60px 20px 50px; }
     main { padding-bottom: 70px; }
@@ -1111,17 +615,17 @@
 <div class="topbar">
   <div class="brand">
     <span class="dot"></span>
-    <span class="full">Tesla Roadster</span> · The AI Brain
+    <span class="full">Tesla Roadster</span> · The AI Side
   </div>
   <nav class="navlinks">
     <a href="#contrast">The Real Story</a>
     <a href="#brain">AI Brain</a>
     <a href="#muscles">Hardware</a>
     <a href="#inverted">Suction Grip</a>
-    <a href="#nerves">IoT</a>
     <a href="#efficiency">Efficiency</a>
-    <a href="#recap">Recap</a>
     <a href="#references">References</a>
+    <!-- REPO LINK IN NAV -->
+    <a href="https://github.com/sarathdotgithub/Tesla-roadster-ai-brain" target="_blank" rel="noopener" class="repo-btn">GitHub Repo ↗</a>
   </nav>
 </div>
 
@@ -1129,21 +633,25 @@
 <header class="hero">
   <img class="hero-img" src="https://i.gzn.jp/img/2026/10/16/tesla-unveils-new-roadster-rocket/00.jpg" alt="Tesla Roadster Rocket variant at launch event">
   <div class="hero-inner">
-    <span class="eyebrow">● Everyone's talking about the jump</span>
+    <span class="eyebrow">● The AI Side of the Engineering</span>
     <h1>
-      Everyone Saw It <span class="strike">Fly</span>.<br>
-      Nobody Saw the <span class="glow">AI Brain</span>.
+      We all saw it jump.<br>
+      Now let's look at the <span class="glow">AI side</span>.
     </h1>
     <p class="lede">
-      The Roadster's mid-air barrel roll went viral. But the real breakthrough isn't the thrusters —
-      it's the <strong>AI control system</strong> deciding, in milliseconds, how and when to fire them.
-      Here's the tech stack almost nobody is talking about.
+      The viral clip showed a car flying through the air. But the real breakthrough isn't just the spectacle—
+      it's the <strong>invisible control system</strong> deciding, in milliseconds, how and when to fire the thrusters. 
+      Here's the tech stack driving the "crazy stuff."
     </p>
     <div class="chip-row">
+      <!-- REPO LINK IN HERO -->
+      <a href="https://github.com/sarathdotgithub/Tesla-roadster-ai-brain" target="_blank" rel="noopener" class="chip hero-repo-link">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right:4px;"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        View the GitHub Repo
+      </a>
       <span class="chip ai">AI sensor fusion</span>
       <span class="chip gas">Cold-gas pneumatics</span>
       <span class="chip gas">2G suction grip</span>
-      <span class="chip">10 thrusters</span>
       <span class="chip hot">Not road-legal</span>
     </div>
   </div>
@@ -1155,7 +663,7 @@
   <section id="contrast">
     <div class="section-head">
       <span class="num red">00</span>
-      <h2>The Story Everyone Missed</h2>
+      <h2>The Story Behind the Spectacle</h2>
     </div>
     <p class="section-sub">
       The clip lasted seconds. The engineering behind it is the part worth studying.
@@ -1250,42 +758,26 @@
             <stop offset="100%" stop-color="#3e6ae1"/>
           </linearGradient>
         </defs>
-
-        <!-- pulse ring -->
         <rect class="pulse-ring" x="262" y="112" width="116" height="96" rx="18"/>
-
-        <!-- left sensors -->
         <rect class="node-box left" x="18" y="34" width="132" height="42" rx="10"/>
         <text class="node-text" x="84" y="60">Speed sensors</text>
-
         <rect class="node-box left" x="18" y="139" width="132" height="42" rx="10"/>
         <text class="node-text" x="84" y="165">Steering angle</text>
-
         <rect class="node-box left" x="18" y="244" width="132" height="42" rx="10"/>
         <text class="node-text" x="84" y="270">IMU / gyro</text>
-
-        <!-- flows in -->
         <path class="flow" d="M150 55 C 215 55, 225 160, 268 160"/>
         <path class="flow" d="M150 160 L 268 160"/>
         <path class="flow" d="M150 265 C 215 265, 225 160, 268 160"/>
-
-        <!-- AI core -->
         <rect class="core" x="268" y="118" width="104" height="84" rx="16"/>
         <text class="core-text" x="320" y="156">AI</text>
         <text class="core-sub" x="320" y="176">FUSION CORE</text>
-
-        <!-- flows out -->
         <path class="flow out" d="M372 160 C 415 160, 425 55, 488 55"/>
         <path class="flow out" d="M372 160 L 488 160"/>
         <path class="flow out" d="M372 160 C 415 160, 425 265, 488 265"/>
-
-        <!-- right actuators -->
         <rect class="node-box right" x="490" y="34" width="132" height="42" rx="10"/>
         <text class="node-text" x="556" y="60">Thrusters</text>
-
         <rect class="node-box right" x="490" y="139" width="132" height="42" rx="10"/>
         <text class="node-text" x="556" y="165">Actuators</text>
-
         <rect class="node-box right" x="490" y="244" width="132" height="42" rx="10"/>
         <text class="node-text" x="556" y="270">Suction fans</text>
       </svg>
@@ -1369,7 +861,7 @@
     </div>
   </section>
 
-  <!-- ================= INVERTED DRIVE (NEW) ================= -->
+  <!-- ================= INVERTED DRIVE ================= -->
   <section id="inverted">
     <div class="section-head">
       <span class="num gas">03</span>
@@ -1427,7 +919,6 @@
       </article>
     </div>
 
-    <!-- Inverted car visual -->
     <div class="suction-wrap">
       <div class="inverted-scene">
         <div class="ceiling-bar"></div>
@@ -1442,7 +933,6 @@
       <div class="diagram-caption">Low pressure underneath → car clings to the surface</div>
     </div>
 
-    <!-- Two systems comparison -->
     <div class="system-split">
       <div class="system-panel thrust">
         <span class="system-tag">Cold-gas thrusters</span>
@@ -1474,67 +964,10 @@
     </div>
   </section>
 
-  <!-- ================= NERVES ================= -->
-  <section id="nerves">
-    <div class="section-head">
-      <span class="num amb">04</span>
-      <h2>The Nervous System: IoT &amp; Sensor Networks</h2>
-    </div>
-    <p class="section-sub">
-      The car is a <strong>connected machine</strong>. Its sensors aren't just for driving — they're the
-      AI's eyes during the jump and the suction system's feedback loop.
-    </p>
-
-    <div class="card-grid">
-      <article class="card amb">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="2.5"/>
-            <path d="M6.5 6.5a7.8 7.8 0 0 0 0 11M17.5 6.5a7.8 7.8 0 0 1 0 11"/>
-            <path d="M3.5 3.5a12 12 0 0 0 0 17M20.5 3.5a12 12 0 0 1 0 17"/>
-          </svg>
-        </div>
-        <h3>Always-On Sensor Array</h3>
-        <p>
-          Speed, steering, brake and autonomy sensors stream continuously into the controller.
-          <strong>No data, no stable hover.</strong>
-        </p>
-      </article>
-
-      <article class="card amb">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 18V8l8-5 8 5v10"/>
-            <path d="M9 18v-5h6v5"/>
-          </svg>
-        </div>
-        <h3>Drive-by-Wire</h3>
-        <p>
-          Steer-by-wire and brake-by-wire give the AI <strong>clean electronic signals</strong> to command
-          — no mechanical lag between decision and action.
-        </p>
-      </article>
-
-      <article class="card amb">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 7h5l2 5 3-8 2 3h4"/>
-            <path d="M4 17h16"/>
-          </svg>
-        </div>
-        <h3>Mode Handoffs</h3>
-        <p>
-          The hard part isn't flying — it's the <strong>seamless switch</strong> between driving, suction,
-          and thrust. That orchestration is software.
-        </p>
-      </article>
-    </div>
-  </section>
-
   <!-- ================= EFFICIENCY ================= -->
   <section id="efficiency">
     <div class="section-head">
-      <span class="num">05</span>
+      <span class="num">04</span>
       <h2>How Efficient Is AI Here? It's the Enabling Layer.</h2>
     </div>
     <p class="section-sub">
@@ -1610,7 +1043,7 @@
   <!-- ================= RECAP ================= -->
   <section id="recap">
     <div class="section-head">
-      <span class="num red">06</span>
+      <span class="num red">05</span>
       <h2>The Recap: What Was Actually Demonstrated</h2>
     </div>
     <p class="section-sub">
@@ -1634,19 +1067,6 @@
         <span style="font-family:ui-monospace,monospace;font-size:0.8rem;font-weight:800;color:var(--gas);min-width:26px;padding-top:3px;">04</span>
         <p style="font-size:0.95rem;color:#cfdae7;">Driving fully inverted without falling — suction fans generating up to 2G of adhesion.</p>
       </div>
-    </div>
-
-    <!-- Jump animation -->
-    <div class="jump-wrap">
-      <div class="jump-scene">
-        <div class="obstacle-row">
-          <div class="obstacle"></div>
-          <div class="obstacle tall"></div>
-          <div class="obstacle"></div>
-        </div>
-        <div class="car"></div>
-      </div>
-      <div class="ground"></div>
     </div>
 
     <div class="warn-grid" style="margin-top:26px;">
@@ -1693,7 +1113,7 @@
 
     <div class="takeaway">
       <span class="label">Copy-ready for your post</span>
-      <p><strong>The “flying” Tesla is a Physical AI story in disguise.</strong></p>
+      <p><strong>We all saw the Tesla Roadster jump. But the real magic lies in the AI side of the engineering.</strong></p>
       <p>
         • An AI core fuses speed, steering, brake and autonomy sensor data in real time.<br>
         • It drives <strong>10 cold-gas thrusters</strong> through electric micro-actuators — pneumatic hardware, millisecond commands.<br>
@@ -1703,7 +1123,7 @@
       <p>
         The thrusters got the headlines. The AI made the manoeuvre — and the inverted drive — possible.
       </p>
-      <p class="hash">#AI #PhysicalAI #Tesla #SpaceX #Pneumatics #IoT #Robotics #FutureOfMobility</p>
+      <p class="hash">#PhysicalAI #ArtificialIntelligence #Tesla #SpaceX #IoT #Engineering #Robotics #TheCrazyStuff</p>
     </div>
   </div>
 
@@ -1825,11 +1245,14 @@
 </main>
 
 <footer>
-  Tesla Roadster · Cold-Gas Thrusters, Suction Grip &amp; AI Control System · Explained
-  <br>
-  Hero image: Tesla launch event coverage via Gigazine. Diagrams and animations are illustrative.
-  <br>
-  Technical details reflect reporting from the October 2026 launch event and Tesla's configurator.
+  <p>Tesla Roadster · Cold-Gas Thrusters, Suction Grip &amp; AI Control System · Explained</p>
+  <p style="margin-top: 10px;">
+    <strong>Project Repository:</strong> <a href="https://github.com/sarathdotgithub/Tesla-roadster-ai-brain" target="_blank" rel="noopener">github.com/sarathdotgithub/Tesla-roadster-ai-brain</a>
+  </p>
+  <p style="margin-top: 10px; font-size: 0.75rem; color: #4a5b6d;">
+    Hero image: Tesla launch event coverage via Gigazine. Diagrams and animations are illustrative.<br>
+    Technical details reflect reporting from the October 2026 launch event and Tesla's configurator.
+  </p>
 </footer>
 
 </body>
