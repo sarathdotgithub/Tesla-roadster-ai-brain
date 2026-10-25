@@ -1,0 +1,4 @@
+gradio
+plotly
+numpy
+pandas
