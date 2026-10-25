@@ -3,20 +3,39 @@ on:
   push:
     branches:
       - main
-      - feature/simulation  # <--- This tells it to trigger on your feature branch!
-  workflow_dispatch:  # Allows manual trigger from the Actions tab
+      - feature/simulation
+  workflow_dispatch:
 
 jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      
-      - uses: huggingface/hub-sync@v0.3.0
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          github_repo_id: ${{ github.repository }}
-          huggingface_repo_id: sarathra/tesla-roadster-ai-brain # Make sure this is your exact HF Space name
-          hf_token: ${{ secrets.HF_TOKEN }}
-          repo_type: space
-          space_sdk: gradio
-          subdirectory: simulation  # Only syncs the contents of the simulation folder
+          python-version: '3.10'
+
+      - name: Install Hugging Face Hub
+        run: pip install huggingface_hub
+
+      - name: Upload simulation folder to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python -c "
+          from huggingface_hub import HfApi
+          import os
+          
+          api = HfApi()
+          print('Starting upload...')
+          api.upload_folder(
+              folder_path='./simulation', # This explicitly grabs the folder
+              repo_id='sarathra/tesal-roadster-ai-brain', # <--- IMPORTANT: See note below
+              repo_type='space',
+              token=os.environ['HF_TOKEN']
+          )
+          print('Upload complete!')
+          "
