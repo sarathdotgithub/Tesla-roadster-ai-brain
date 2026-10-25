@@ -1,7 +1,9 @@
 name: Sync to Hugging Face Hub
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - feature/simulation  # <--- This tells it to trigger on your feature branch!
   workflow_dispatch:  # Allows manual trigger from the Actions tab
 
 jobs:
@@ -13,8 +15,8 @@ jobs:
       - uses: huggingface/hub-sync@v0.3.0
         with:
           github_repo_id: ${{ github.repository }}
-          huggingface_repo_id: sarathra/tesla-roadster-ai-brain
+          huggingface_repo_id: sarathra/tesla-roadster-ai-brain # Make sure this is your exact HF Space name
           hf_token: ${{ secrets.HF_TOKEN }}
           repo_type: space
           space_sdk: gradio
-          subdirectory: simulation  # Syncs only the contents of your simulation folder
+          subdirectory: simulation  # Only syncs the contents of the simulation folder
