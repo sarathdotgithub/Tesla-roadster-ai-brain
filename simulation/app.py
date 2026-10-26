@@ -46,7 +46,7 @@ def run_dashboard(vehicle, reaction_ms, wind):
     return fig, verdict
 
 # 2. Build the Gradio User Interface
-with gr.Blocks(theme=gr.themes.Monochrome(), title="Physical AI vs Human") as demo:
+with gr.Blocks(title="Physical AI vs Human") as demo:
     gr.Markdown("# 🚀 Physical AI vs Human: Attitude Control Simulation")
     gr.Markdown("Compare the reaction times of an elite human (e.g., Max Verstappen) versus a Physical AI controller in stabilizing a vehicle mid-air.")
     
@@ -82,4 +82,8 @@ with gr.Blocks(theme=gr.themes.Monochrome(), title="Physical AI vs Human") as de
 
 # 4. Launch the web server (THIS IS THE MISSING PIECE)
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(
+        theme=gr.themes.Monochrome(), # Moved here from Blocks()
+        ssr_mode=False,               # This stops the Node.js crash
+        show_api=False
+    )
