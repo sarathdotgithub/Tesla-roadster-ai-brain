@@ -33,7 +33,7 @@ jobs:
           print('Starting upload...')
           api.upload_folder(
               folder_path='./simulation', # This explicitly grabs the folder
-              repo_id='sarathra/tesal-roadster-ai-brain', # <--- IMPORTANT: See note below
+              repo_id='sarathra/tesla-roadster-ai-brain', # <--- IMPORTANT: See note below
               repo_type='space',
               token=os.environ['HF_TOKEN']
           )
