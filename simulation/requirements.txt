@@ -2,3 +2,4 @@ gradio== 4.44.1
 plotly
 numpy
 pandas
+huggingface_hub == 0.26.2
