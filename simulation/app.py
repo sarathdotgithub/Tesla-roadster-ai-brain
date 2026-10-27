@@ -74,4 +74,7 @@ with gr.Blocks(theme=gr.themes.Monochrome(), title="Physical AI vs Human") as de
 
 # Standard launch, no extra experimental flags
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(
+        server_name="0.0.0.0",  # Binds to all network interfaces
+        share=True              # Bypasses the localhost check
+    )
