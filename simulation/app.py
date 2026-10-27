@@ -1,5 +1,6 @@
 import gradio as gr
 import plotly.graph_objects as go
+import spaces
 from plotly.subplots import make_subplots
 from physics_engine import simulate_stabilization
 
@@ -37,6 +38,10 @@ def run_dashboard(vehicle, reaction_ms, wind):
         verdict = f"**Result:** The Human reaction time of {reaction_ms}ms was too slow. The vehicle tilted significantly due to the crosswind. (In a real scenario, a 2-ton vehicle would likely crash)."
 
     return fig, verdict
+@spaces.GPU
+def test_gpu():
+    return "GPU have checked"
+
 
 # Standard theme placement for maximum compatibility
 with gr.Blocks(theme=gr.themes.Monochrome(), title="Physical AI vs Human") as demo:
