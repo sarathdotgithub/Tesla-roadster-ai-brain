@@ -1,66 +1,104 @@
 import numpy as np
 
-def simulate_emergency(system_type: str, wind_force: float, g_force: float) -> dict:
+def simulate_emergency(controller_type: str, wind_impulse: float, g_force: float, delay_ms: float) -> dict:
     """
-    Simulates an emergency crosswind hit during a jump.
-    Compares Human (Max Verstappen) vs Physical AI.
+    Simulates an unstable inverted pendulum (the Roadster) with a delayed controller.
     """
-    t = np.linspace(0, 2.5, 500) # 2.5 seconds of flight
+    dt = 0.001 # 1ms timestep for accurate integration
+    T = 4.0    # 4 seconds of simulation
+    steps = int(T / dt)
+    time = np.linspace(0, T, steps)
     
-    # --- Setup Parameters based on system ---
-    if "Human" in system_type:
-        base_reaction_ms = 200.0
-        # G-Force effect: If G > 4, human reaction time worsens significantly (G-LOC)
+    # Vehicle properties (approximate Roadster)
+    m = 2000.0 # kg
+    L = 1.5    # m (height of CoM)
+    g = 9.81
+    omega_sq = (m * g * L) / (m * L**2) # Inverted pendulum instability factor
+    
+    # --- Controller Limits (Phase 1 & 2) ---
+    if controller_type == "Human":
+        # Sum of sensing (35ms), neural (75ms), decision (50ms), muscle (40ms) = ~200ms
+        base_delay = 0.200 
+        # G-force degrades human performance
         if g_force > 4.0:
-            reaction_ms = base_reaction_ms * (1 + (g_force - 4.0) * 0.5)
-        else:
-            reaction_ms = base_reaction_ms
-        control_hz = 10.0
-        color = "#e82127" # Tesla Red
-        overshoot_factor = 2.5 # Humans over-correct
+            base_delay *= (1 + (g_force - 4.0) * 0.5)
         
-    else: # Physical AI
-        reaction_ms = 2.0
-        control_hz = 1000.0
-        color = "#8b5cf6" # AI Purple
-        overshoot_factor = 0.0 # AI has perfect PID control
+        control_delay = delay_ms / 1000.0 if delay_ms > 0 else base_delay
+        noise_amplitude = 0.15 # Neuromuscular tremor
+        noise_freq = 10.0      # 10 Hz tremor
+        kp, kd = 40.0, 8.0     # Human PID gains (less optimal)
         
-    reaction_s = reaction_ms / 1000.0
-    tilt_data = []
+    else: # Physical AI (IMU-based)
+        control_delay = 0.002 # 2ms
+        noise_amplitude = 0.0 # AI has zero tremor
+        noise_freq = 0.0
+        kp, kd = 80.0, 15.0    # AI PID gains (perfectly tuned)
     
-    # Initial sudden disturbance (e.g., a massive gust of wind at t=0.1s)
-    disturbance_time = 0.1
-    disturbance_angle = wind_force * 2.0 
+    # State variables
+    theta = 0.0
+    theta_dot = 0.0
     
-    for time in t:
-        current_tilt = 0.0
-        
-        if time > disturbance_time:
-            time_since_disturbance = time - disturbance_time
+    history_theta = []
+    history_torque = []
+    buffer_size = int(control_delay / dt) + 1
+    theta_buffer = [0.0] * buffer_size
+    theta_dot_buffer = [0.0] * buffer_size
+    
+    # Simulate
+    for i in range(steps):
+        # Apply external disturbance (impulse wind gust at t=0.5s)
+        disturbance = 0.0
+        if 0.5 <= time[i] < 0.55:
+            disturbance = wind_impulse
             
-            if time_since_disturbance < reaction_s:
-                # System is blind to the event, drifting
-                current_tilt = disturbance_angle * time_since_disturbance * 5
-            else:
-                # System has reacted and is correcting
-                time_since_correction = time_since_disturbance - reaction_s
-                max_tilt = disturbance_angle * reaction_s * 5
-                
-                # Base correction curve
-                current_tilt = max_tilt * np.exp(-4.0 * time_since_correction)
-                
-                # Human jitter/over-correction (pneumatic valves are opened/closed clumsily)
-                if "Human" in system_type:
-                    jitter = np.sin(time_since_correction * (control_hz * 2 * np.pi)) * (overshoot_factor * 0.5)
-                    current_tilt += jitter
-                    
-        tilt_data.append(current_tilt)
-
+        # Controller reads from buffer (delayed state)
+        delayed_theta = theta_buffer.pop(0)
+        delayed_theta_dot = theta_dot_buffer.pop(0)
+        
+        # Control Law (PID)
+        u = (kp * delayed_theta) + (kd * delayed_theta_dot)
+        
+        # Add Human Tremor
+        if controller_type == "Human":
+            u += noise_amplitude * np.sin(2 * np.pi * noise_freq * time[i])
+            
+        # Actuator Saturation (Max thruster output)
+        u = np.clip(u, -50.0, 50.0)
+        
+        # Physics Update (Euler integration)
+        theta_ddot = omega_sq * np.sin(theta) + disturbance + u
+        theta_dot += theta_ddot * dt
+        theta += theta_dot * dt
+        
+        # Update buffers
+        theta_buffer.append(theta)
+        theta_dot_buffer.append(theta_dot)
+        
+        # Log data (every 10 steps to save memory)
+        if i % 10 == 0:
+            history_theta.append(theta)
+            history_torque.append(u)
+            
     return {
-        "time": t,
-        "tilt": tilt_data,
-        "color": color,
-        "reaction_s": reaction_s,
-        "control_hz": control_hz,
-        "reaction_ms": reaction_ms
+        "time": time[::10],
+        "theta": np.degrees(history_theta), # Convert to degrees
+        "torque": history_torque,
+        "delay_ms": control_delay * 1000
     }
+
+def run_monte_carlo() -> dict:
+    """Phase 4: Sweep delay parameters to find the critical threshold."""
+    delays = np.linspace(10, 350, 25)
+    survival_rates = []
+    
+    for delay in delays:
+        successes = 0
+        trials = 20
+        for _ in range(trials):
+            res = simulate_emergency("Human", wind_impulse=10.0, g_force=1.0, delay_ms=delay)
+            # Success if max tilt is less than 30 degrees
+            if np.max(np.abs(res["theta"])) < 30:
+                successes += 1
+        survival_rates.append((successes / trials) * 100)
+        
+    return {"delays": delays, "survival": survival_rates}
