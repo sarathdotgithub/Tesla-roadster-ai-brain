@@ -4,7 +4,7 @@ try:
     @spaces.GPU
     def _gpu_placeholder():
         return None
-except ImportError:  # running on CPU hardware, where `spaces` isn't installed
+except ImportError:  # CPU hardware doesn't have `spaces`
     pass
 import gradio as gr
 import numpy as np
@@ -73,7 +73,9 @@ def run_single(controller, delay_ms, wind, g_force, compare):
             note = f"\n\n> G-load stretched the human delay from {delay_ms:.0f} ms to **{main['delay_ms']:.0f} ms**."
         md = (f"{status} &nbsp; | &nbsp; **Peak tilt:** {'>90' if main['peak_deg'] > 90 else format(main['peak_deg'], '.1f')}° &nbsp; | &nbsp; "
               f"**Recovery time:** {rec_txt} &nbsp; | &nbsp; **Effective delay:** {main['delay_ms']:.0f} ms &nbsp; | &nbsp; "
-              f"**Mean effort:** {main['effort']:.1f}{note}")
+              f"**Mean effort:** {main['effort']:.1f}"
+              f"\n\n🛣️ **Real-world meaning:** at 100 km/h a vehicle travels "
+              f"**{main['delay_ms'] / 1000 * 27.78:.2f} m** before this controller even starts to react.{note}")
         return fig, md
     except Exception as e:
         return _empty(e)
@@ -124,10 +126,31 @@ blocks_kwargs = {} if GRADIO_6 else {"theme": THEME}
 launch_kwargs = {"theme": THEME} if GRADIO_6 else {}
 
 with gr.Blocks(title="Physical AI vs Human", **blocks_kwargs) as demo:
-    gr.Markdown("# 🚀 Physical AI vs Human: Attitude Control Simulation\n"
-                "A mid-air Tesla Roadster is modelled as an **unstable inverted pendulum**. "
-                "A wind gust hits at 0.5 s. Can the controller catch it before it tips past 30°?")
-
+    gr.Markdown(
+        "# 🚗⚡ Physical AI vs Human: The Reaction-Time Gap\n"
+        "**Tesla's mission is to build a world of amazing abundance, and Physical AI is how it gets there.** "
+        "Safer driving, autonomous vehicles and robots like Optimus all depend on one thing: "
+        "reacting to the physical world faster and more reliably than a human can. "
+        "This simulation measures that gap. A Roadster-style vehicle is tipped by a sudden wind gust, "
+        "and a controller must catch it before it falls over."
+    )
+    with gr.Accordion("🧭 How to read this simulation (start here)", open=False):
+        gr.Markdown(
+            "**The scene.** A vehicle balanced like an upside-down pendulum is unstable: left alone, any tilt grows. "
+            "At 0.5 s a wind gust pushes it. The controller must push back.\n\n"
+            "**The three controllers.**\n"
+            "- 🟠 **Human**: ~200 ms from seeing the tilt to acting, plus hand tremor and fatigue under G-load.\n"
+            "- 🟣 **Physical AI (IMU)**: reads a motion sensor directly, ~2 ms.\n"
+            "- 🔵 **Physical AI (Vision)**: reads cameras like a self-driving stack, ~40 ms.\n\n"
+            "**The tabs.**\n"
+            "- **Single run**: one gust, one controller. Top plot: tilt (the red zone means a crash). "
+            "Bottom plot: how hard the controller pushed back.\n"
+            "- **Monte Carlo**: repeats the gust many times with random human variability and shows what % survive at each delay. "
+            "The point where it drops under 50% is the *critical delay*.\n"
+            "- **Stability map**: blue and green mean safe, orange and red mean crash, for every combination of delay and wind strength.\n\n"
+            "**The headline.** Humans survive near their own limit, around 200 to 290 ms, while Physical AI has huge margin. "
+            "That margin is what makes autonomy safer, and it is the physics behind the mission."
+        )
     with gr.Row():
         controller = gr.Dropdown(CONTROLLERS, value="Human", label="Controller")
         delay = gr.Slider(1, 400, value=200, step=1, label="Reaction delay (ms)",
@@ -149,9 +172,12 @@ with gr.Blocks(title="Physical AI vs Human", **blocks_kwargs) as demo:
             map_btn = gr.Button("Build map", variant="primary")
             plot3, md3 = gr.Plot(), gr.Markdown()
 
-    gr.Markdown("*Conceptual model for research. The 2 ms AI loop is an IMU-based controller; "
-                "vision-based AI is modelled at 40 ms. Human delay components: sensing ~35 ms, neural ~75 ms, "
-                "decision ~50 ms, muscle ~40 ms.*")
+    gr.Markdown(
+        "*Independent research project, not affiliated with or endorsed by Tesla, Inc. "
+        "A simplified conceptual model (inverted pendulum with a delayed PD controller), not Tesla's actual control software. "
+        "Human delay is built from sensing ~35 ms, neural ~75 ms, decision ~50 ms and muscle ~40 ms. "
+        "The 2 ms AI loop is an IMU-based controller and the 40 ms loop represents a vision-based one.*"
+    )
 
     controller.change(default_delay, controller, delay)
     single_in = [controller, delay, wind, g_force, compare]
