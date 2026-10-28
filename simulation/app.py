@@ -1,13 +1,13 @@
 try:
     import spaces
+    # This decorator tells Hugging Face ZeroGPU to use the GPU for these functions
+    def gpu_decorator(func):
+        return spaces.GPU(func)
+except ImportError:  # Local CPU fallback
+    def gpu_decorator(func):
+        return func
 
-    @spaces.GPU
-    def _gpu_placeholder():
-        return None
-except ImportError:  # CPU hardware doesn't have `spaces`
-    pass
 import gradio as gr
-import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -19,7 +19,6 @@ COLORS = {"Human": "#f59e0b", "Physical AI (IMU)": "#8b5cf6", "Physical AI (Visi
 THEME = gr.themes.Monochrome()
 GRADIO_6 = int(gr.__version__.split(".")[0]) >= 6
 
-
 def _style(fig, height=430):
     fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
                       plot_bgcolor="rgba(0,0,0,0)", height=height,
@@ -27,14 +26,11 @@ def _style(fig, height=430):
                       legend=dict(orientation="h", y=-0.15))
     return fig
 
-
 def _empty(msg):
     return _style(go.Figure()), f"**Error:** {msg}"
 
-
 def default_delay(controller):
     return PROFILES[controller]["delay_ms"]
-
 
 # ---------- Tab 1: single run ----------
 def run_single(controller, delay_ms, wind, g_force, compare):
@@ -65,23 +61,16 @@ def run_single(controller, delay_ms, wind, g_force, compare):
         fig.update_xaxes(title_text="Time (s)", row=2, col=1)
         _style(fig, 520)
 
-        rec = main["recovery_s"]
         status = "💥 **CRASHED**" if main["crashed"] else "✅ **Stabilized**"
-        rec_txt = "never settled" if rec is None else f"{rec:.2f} s"
-        note = ""
-        if controller == "Human" and abs(main["delay_ms"] - (delay_ms or 0)) > 1:
-            note = f"\n\n> G-load stretched the human delay from {delay_ms:.0f} ms to **{main['delay_ms']:.0f} ms**."
         md = (f"{status} &nbsp; | &nbsp; **Peak tilt:** {'>90' if main['peak_deg'] > 90 else format(main['peak_deg'], '.1f')}° &nbsp; | &nbsp; "
-              f"**Recovery time:** {rec_txt} &nbsp; | &nbsp; **Effective delay:** {main['delay_ms']:.0f} ms &nbsp; | &nbsp; "
-              f"**Mean effort:** {main['effort']:.1f}"
-              f"\n\n🛣️ **Real-world meaning:** at 100 km/h a vehicle travels "
-              f"**{main['delay_ms'] / 1000 * 27.78:.2f} m** before this controller even starts to react.{note}")
+              f"**Effective delay:** {main['delay_ms']:.0f} ms &nbsp; | &nbsp; "
+              f"**Mean effort:** {main['effort']:.1f}")
         return fig, md
     except Exception as e:
         return _empty(e)
 
-
-# ---------- Tab 2: Monte Carlo ----------
+# ---------- Tab 2: Monte Carlo (GPU Accelerated) ----------
+@gpu_decorator
 def run_mc(controller, wind, g_force, trials):
     try:
         top = 350 if controller == "Human" else 400
@@ -96,14 +85,13 @@ def run_mc(controller, wind, g_force, trials):
         crit = res["critical_ms"]
         md = (f"**Critical delay (survival drops below 50%):** ~{crit:.0f} ms" if crit
               else "**No critical delay in this range.** Survival stays at 50% or higher.")
-        md += (f"\n\nEach point is {int(trials)} runs with random delay jitter, sensor noise and tremor phase. "
-               f"Survival means peak tilt stayed under {CRASH_DEG:.0f}°.")
+        md += f"\n\n*Each point is {int(trials)} runs. PyTorch GPU Tensors accelerated this calculation.*"
         return _style(fig), md
     except Exception as e:
         return _empty(e)
 
-
-# ---------- Tab 3: stability map ----------
+# ---------- Tab 3: stability map (GPU Accelerated) ----------
+@gpu_decorator
 def run_map(controller, g_force):
     try:
         res = stability_map(controller, g_force)
@@ -114,13 +102,12 @@ def run_map(controller, g_force):
                                  contours=dict(start=CRASH_DEG, end=CRASH_DEG, size=1, coloring="none"),
                                  line=dict(color="white", width=3, dash="dash"),
                                  showscale=False, name="Crash boundary"))
-        fig.update_layout(title=f"Stability map: {controller} (dashed line = {CRASH_DEG:.0f}° crash boundary)",
+        fig.update_layout(title=f"Stability map: {controller}",
                           xaxis_title="Reaction delay (ms)", yaxis_title="Wind impulse strength")
         return _style(fig, 480), ("Below and left of the dashed line the vehicle survives. "
                                   "Faster controllers push the boundary far to the right.")
     except Exception as e:
         return _empty(e)
-
 
 blocks_kwargs = {} if GRADIO_6 else {"theme": THEME}
 launch_kwargs = {"theme": THEME} if GRADIO_6 else {}
@@ -129,55 +116,27 @@ with gr.Blocks(title="Physical AI vs Human", **blocks_kwargs) as demo:
     gr.Markdown(
         "# 🚗⚡ Physical AI vs Human: The Reaction-Time Gap\n"
         "**Tesla's mission is to build a world of amazing abundance, and Physical AI is how it gets there.** "
-        "Safer driving, autonomous vehicles and robots like Optimus all depend on one thing: "
-        "reacting to the physical world faster and more reliably than a human can. "
-        "This simulation measures that gap. A Roadster-style vehicle is tipped by a sudden wind gust, "
-        "and a controller must catch it before it falls over."
+        "This simulation measures that gap using a GPU-accelerated inverted pendulum physics engine."
     )
-    with gr.Accordion("🧭 How to read this simulation (start here)", open=False):
-        gr.Markdown(
-            "**The scene.** A vehicle balanced like an upside-down pendulum is unstable: left alone, any tilt grows. "
-            "At 0.5 s a wind gust pushes it. The controller must push back.\n\n"
-            "**The three controllers.**\n"
-            "- 🟠 **Human**: ~200 ms from seeing the tilt to acting, plus hand tremor and fatigue under G-load.\n"
-            "- 🟣 **Physical AI (IMU)**: reads a motion sensor directly, ~2 ms.\n"
-            "- 🔵 **Physical AI (Vision)**: reads cameras like a self-driving stack, ~40 ms.\n\n"
-            "**The tabs.**\n"
-            "- **Single run**: one gust, one controller. Top plot: tilt (the red zone means a crash). "
-            "Bottom plot: how hard the controller pushed back.\n"
-            "- **Monte Carlo**: repeats the gust many times with random human variability and shows what % survive at each delay. "
-            "The point where it drops under 50% is the *critical delay*.\n"
-            "- **Stability map**: blue and green mean safe, orange and red mean crash, for every combination of delay and wind strength.\n\n"
-            "**The headline.** Humans survive near their own limit, around 200 to 290 ms, while Physical AI has huge margin. "
-            "That margin is what makes autonomy safer, and it is the physics behind the mission."
-        )
+    
     with gr.Row():
         controller = gr.Dropdown(CONTROLLERS, value="Human", label="Controller")
-        delay = gr.Slider(1, 400, value=200, step=1, label="Reaction delay (ms)",
-                          info="Resets to the controller's default when you switch controller")
+        delay = gr.Slider(1, 400, value=200, step=1, label="Reaction delay (ms)")
         wind = gr.Slider(1, 30, value=10, step=1, label="Wind impulse strength")
-        g_force = gr.Slider(1, 9, value=1, step=0.5, label="Sustained G-load (humans only)",
-                            info="Above 4 g the human delay increases")
+        g_force = gr.Slider(1, 9, value=1, step=0.5, label="Sustained G-load (humans only)")
 
     with gr.Tabs():
         with gr.Tab("Single run"):
-            compare = gr.Checkbox(value=True, label="Overlay the other controllers at their default delays")
+            compare = gr.Checkbox(value=True, label="Overlay the other controllers")
             run_btn = gr.Button("Run simulation", variant="primary")
             plot1, md1 = gr.Plot(), gr.Markdown()
-        with gr.Tab("Monte Carlo: find the critical delay"):
+        with gr.Tab("Monte Carlo (GPU)"):
             trials = gr.Slider(10, 100, value=40, step=10, label="Trials per delay")
             mc_btn = gr.Button("Run Monte Carlo", variant="primary")
             plot2, md2 = gr.Plot(), gr.Markdown()
-        with gr.Tab("Stability map"):
+        with gr.Tab("Stability map (GPU)"):
             map_btn = gr.Button("Build map", variant="primary")
             plot3, md3 = gr.Plot(), gr.Markdown()
-
-    gr.Markdown(
-        "*Independent research project, not affiliated with or endorsed by Tesla, Inc. "
-        "A simplified conceptual model (inverted pendulum with a delayed PD controller), not Tesla's actual control software. "
-        "Human delay is built from sensing ~35 ms, neural ~75 ms, decision ~50 ms and muscle ~40 ms. "
-        "The 2 ms AI loop is an IMU-based controller and the 40 ms loop represents a vision-based one.*"
-    )
 
     controller.change(default_delay, controller, delay)
     single_in = [controller, delay, wind, g_force, compare]
