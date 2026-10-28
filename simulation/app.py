@@ -1,105 +1,84 @@
 import gradio as gr
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from physics_engine import simulate_emergency
+from physics_engine import simulate_emergency, run_monte_carlo
 import spaces
 
-# Dummy function to pass ZeroGPU check
 @spaces.GPU
-def test_gpu():
-    return "GPU check passed"
+def dummy_gpu_check(): return "ok"
 
-def run_dashboard(system_type, wind_force, g_force):
-    data = simulate_emergency(system_type, wind_force, g_force)
+def run_dashboard(controller, wind_impulse, g_force, delay_ms):
+    data = simulate_emergency(controller, wind_impulse, g_force, delay_ms)
     
-    # 3 Subplots: Attitude, Update Rate, and G-Force Impact
     fig = make_subplots(
-        rows=1, cols=3, 
-        subplot_titles=("Emergency Pitch Stabilization", "System Update Rate (Hz)", "Human G-Force Limit"),
-        column_widths=[0.5, 0.25, 0.25]
+        rows=1, cols=2, 
+        subplot_titles=("Inverted Pendulum Dynamics", "Phase Portrait (State Space)"),
     )
     
-    # 1. Main Pitch Chart
-    fig.add_trace(go.Scatter(x=data["time"], y=data["tilt"], 
-                             mode='lines', name='Tilt Angle', line=dict(color=data["color"], width=3)), 
-                  row=1, col=1)
+    color = "#e82127" if controller == "Human" else "#8b5cf6"
     
-    fig.add_vline(x=data["reaction_s"] + 0.1, line_dash="dash", line_color="yellow", row=1, col=1, 
-                  annotation_text=f"Reacted at {data['reaction_ms']:.0f}ms", annotation_position="top right")
+    # 1. Time Series
+    fig.add_trace(go.Scatter(x=data["time"], y=data["theta"], mode='lines', 
+                             line=dict(color=color, width=3), name="Tilt"), row=1, col=1)
+    fig.update_yaxes(title_text="Tilt Angle (Degrees)", row=1, col=1)
+    fig.update_xaxes(title_text="Time (s)", row=1, col=1)
     
-    fig.update_yaxes(title_text="Tilt (Degrees)", row=1, col=1)
-
-    # 2. Control Frequency Bar Chart
-    labels = ['Human Brain', 'Physical AI']
-    freqs = [10, 1000]
-    bar_colors = ['#e82127', '#8b5cf6']
-    fig.add_trace(go.Bar(x=labels, y=freqs, marker_color=bar_colors, text=freqs, textposition='outside'), 
-                  row=1, col=2)
-    fig.update_yaxes(title_text="Updates per Second", type="log", row=1, col=2)
-
-    # 3. G-Force Impact Chart
-    g_vals = ['1G', '3G', '5G', '7G']
-    human_efficiency = [100, 95, 40, 5] # % efficiency
-    ai_efficiency = [100, 100, 100, 100]
+    # 2. Phase Portrait (Theta vs Theta_dot)
+    # We approximate theta_dot from the data for visualization
+    theta_dot = np.gradient(data["theta"], data["time"])
+    fig.add_trace(go.Scatter(x=data["theta"], y=theta_dot, mode='lines', 
+                             line=dict(color=color, width=2), name="Trajectory"), row=1, col=2)
+    fig.update_xaxes(title_text="Angle (Deg)", row=1, col=2)
+    fig.update_yaxes(title_text="Angular Velocity (Deg/s)", row=1, col=2)
     
-    fig.add_trace(go.Scatter(x=g_vals, y=human_efficiency, mode='lines+markers', name='Human', line=dict(color='#e82127', width=3)), row=1, col=3)
-    fig.add_trace(go.Scatter(x=g_vals, y=ai_efficiency, mode='lines+markers', name='AI', line=dict(color='#8b5cf6', width=3, dash='dash')), row=1, col=3)
-    fig.update_yaxes(title_text="System Efficiency (%)", row=1, col=3)
+    fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", 
+                      plot_bgcolor="rgba(0,0,0,0)", height=450, showlegend=False)
 
-    # Style
-    fig.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        height=450,
-        showlegend=False,
-        margin=dict(l=20, r=20, t=50, b=20)
-    )
-
-    # Dynamic Conclusion Text
-    if "Human" in system_type:
-        if g_force >= 5:
-            verdict = f"### 🚨 **CRITICAL FAILURE: G-LOC**\nAt **{g_force}G**, Max Verstappen's blood pressure drops. His reaction time degrades to **{data['reaction_ms']:.0f}ms**, and his hands lose fine motor control. The pneumatic actuators are over-corrected, resulting in catastrophic oscillation. **Result: Crash.**"
-        else:
-            verdict = f"### ⚠️ **HIGH RISK**\nMax reacts in **{data['reaction_ms']:.0f}ms**. Because the human brain can only send 10 control signals per second, he over-corrects the pneumatic valves (jitter). The vehicle wobbles violently and barely stabilizes."
+    if controller == "Human":
+        verdict = f"### 🚨 **DELAYED CONTROL CRASH**\nReaction delay: **{data['delay_ms']:.0f}ms**. As the inverted pendulum tips, the human reacts too late. The delay causes positive feedback, leading to catastrophic failure (tilt > 90°)."
     else:
-        verdict = f"### ✅ **PERFECT STABILIZATION**\nThe Physical AI detects the crosswind in **2ms**. It updates the electric actuators **1,000 times per second**, applying perfectly dampened pneumatic thrust. The vehicle stabilizes smoothly with zero oscillation. **Result: Success.**"
+        verdict = f"### ✅ **STABILIZED**\nReaction delay: **{data['delay_ms']:.0f}ms**. The Physical AI reads the IMU and fires thrusters with sub-millisecond latency. The inverted pendulum is actively stabilized before it passes the point of no return."
 
     return fig, verdict
 
-# --- UI ---
-with gr.Blocks(theme=gr.themes.Monochrome(), title="Physical AI vs Human") as demo:
-    gr.Markdown("# 🚀 Emergency Attitude Control: Human vs Physical AI")
-    gr.Markdown("Simulate a sudden crosswind hitting the Tesla Roadster mid-air. Compare Max Verstappen's biological limits against the Tesla/SpaceX Physical AI.")
+def run_sweep():
+    sweep_data = run_monte_carlo()
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=sweep_data["delays"], y=sweep_data["survival"], 
+                             mode='lines+markers', line=dict(color='#f5a524', width=3)))
     
-    with gr.Row():
-        with gr.Column(scale=1):
-            system_dropdown = gr.Dropdown(
-                choices=["Human (Max Verstappen)", "Physical AI (Tesla/SpaceX)"], 
-                value="Human (Max Verstappen)", 
-                label="Select Controller"
-            )
-            wind_slider = gr.Slider(
-                minimum=1, maximum=15, value=8, step=1, 
-                label="Crosswind Force",
-                info="Simulates a massive gust hitting the car mid-air"
-            )
-            gforce_slider = gr.Slider(
-                minimum=1, maximum=8, value=4, step=0.5, 
-                label="Mid-Air G-Force",
-                info="At >5G, humans experience G-LOC (passing out). AI is unaffected."
-            )
-            run_btn = gr.Button("Run Emergency Simulation", variant="primary")
-            
-        with gr.Column(scale=2):
-            plot_output = gr.Plot(label="Telemetry Data")
-            text_output = gr.Markdown()
-
-    run_btn.click(
-        fn=run_dashboard, 
-        inputs=[system_dropdown, wind_slider, gforce_slider], 
-        outputs=[plot_output, text_output]
+    fig.update_layout(
+        title="Critical Delay Threshold (Monte Carlo)",
+        xaxis_title="Reaction Delay (ms)",
+        yaxis_title="Survival Probability (%)",
+        template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        height=400
     )
+    return fig
+
+with gr.Blocks(theme=gr.themes.Monochrome(), title="Control Theory Simulation") as demo:
+    gr.Markdown("# ⚙️ Inverted Pendulum: Human vs Physical AI")
+    gr.Markdown("Modeling the Roadster as an unstable plant with delayed control. Observe the **Critical Delay** where human stabilization becomes mathematically impossible.")
+    
+    with gr.Tabs():
+        with gr.TabItem("Single Simulation"):
+            with gr.Row():
+                with gr.Column(scale=1):
+                    controller = gr.Radio(choices=["Human", "Physical AI"], value="Human", label="Controller")
+                    wind = gr.Slider(5, 20, 10, label="Impulse Disturbance")
+                    g_force = gr.Slider(1, 8, 1, step=0.5, label="G-Force (Degrades Human)")
+                    delay = gr.Slider(50, 300, 200, step=10, label="Manual Reaction Delay (ms)")
+                    btn = gr.Button("Run Simulation", variant="primary")
+                with gr.Column(scale=2):
+                    plot = gr.Plot()
+                    text = gr.Markdown()
+            btn.click(run_dashboard, inputs=[controller, wind, g_force, delay], outputs=[plot, text])
+            
+        with gr.TabItem("Parameter Sweep (Monte Carlo)"):
+            gr.Markdown("Run a 20-trial Monte Carlo simulation at each delay step to find the survival curve. Notice the sharp drop-off.")
+            sweep_btn = gr.Button("Run Sweep", variant="primary")
+            sweep_plot = gr.Plot()
+            sweep_btn.click(run_sweep, inputs=[], outputs=[sweep_plot])
 
 if __name__ == "__main__":
     demo.launch(server_name="0.0.0.0")
