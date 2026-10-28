@@ -1,3 +1,11 @@
+try:
+    import spaces
+
+    @spaces.GPU
+    def _gpu_placeholder():
+        return None
+except ImportError:  # running on CPU hardware, where `spaces` isn't installed
+    pass
 import gradio as gr
 import numpy as np
 import plotly.graph_objects as go
