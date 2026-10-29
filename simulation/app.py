@@ -9,7 +9,18 @@ import json
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from physics_engine import CRASH_DEG, PROFILES, simulate_emergency, run_monte_carlo, stability_map
+try:
+    import spaces
+    def gpu_decorator(func): return spaces.GPU(func)
+    
+    # --- ADD THIS DUMMY FUNCTION ---
+    @spaces.GPU
+    def _hf_gpu_check():
+        return "GPU check passed"
+    # -------------------------------
 
+except ImportError:
+    def gpu_decorator(func): return func
 CONTROLLERS = list(PROFILES)
 THEME = gr.themes.Monochrome()
 GRADIO_6 = int(gr.__version__.split(".")[0]) >= 6
