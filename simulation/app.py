@@ -16,10 +16,10 @@ GRADIO_6 = int(gr.__version__.split(".")[0]) >= 6
 
 # --- HTML5 CANVAS RENDERER ---
 def generate_canvas_html(data, vehicle_type):
-    # We dump the Python data into a JSON string for JavaScript to read
     data_json = json.dumps(data)
     
-    html = f"""
+    # Use a standard string (no 'f' at the beginning)
+    html_template = """
     <div style="background: #0d1117; border-radius: 10px; padding: 20px; text-align: center; font-family: sans-serif;">
         <canvas id="simCanvas" width="800" height="300" style="background: #161e29; border: 1px solid #2a3444; border-radius: 8px; width: 100%; max-width: 800px;"></canvas>
         <div style="margin-top: 10px; color: #8ea2ba;">
@@ -29,15 +29,16 @@ def generate_canvas_html(data, vehicle_type):
     </div>
     
     <script>
-        const data = {data_json};
+        // We use placeholders like __DATA__ and __VEHICLE__ to avoid f-string conflicts
+        const data = __DATA__;
+        const isCar = "__VEHICLE__" === "Car";
+        
         const canvas = document.getElementById('simCanvas');
         const ctx = canvas.getContext('2d');
-        const isCar = "{vehicle_type}" === "Car";
         
         let animationId;
         let currentFrame = 0;
         
-        // Scaling factors for the canvas
         const scaleX = 2.0; 
         const scaleY = 1.5;
         const centerX = 100;
@@ -46,31 +47,25 @@ def generate_canvas_html(data, vehicle_type):
         function drawVehicle(x, y, theta, torque) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Draw Ground
             ctx.fillStyle = "#253040";
             ctx.fillRect(0, centerY + 20, canvas.width, 50);
             
             ctx.save();
-            // Translate to the vehicle's current position on screen
             let screenX = centerX + (x * scaleX);
             let screenY = centerY - (y * scaleY);
             
-            // Prevent it from flying off screen
             if (screenX > 700) screenX = 700; 
             
             ctx.translate(screenX, screenY);
             ctx.rotate(theta * Math.PI / 180);
             
             if (isCar) {
-                // Draw Tesla
                 ctx.fillStyle = "#e82127";
                 ctx.fillRect(-30, -15, 60, 20);
-                // Wheels
                 ctx.fillStyle = "#111";
                 ctx.beginPath(); ctx.arc(-20, 5, 8, 0, Math.PI*2); ctx.fill();
                 ctx.beginPath(); ctx.arc(20, 5, 8, 0, Math.PI*2); ctx.fill();
             } else {
-                // Draw Rocket
                 ctx.fillStyle = "#e6edf5";
                 ctx.beginPath();
                 ctx.moveTo(0, -30);
@@ -80,7 +75,6 @@ def generate_canvas_html(data, vehicle_type):
                 ctx.fill();
             }
             
-            // Draw Thrusters based on control torque
             if (Math.abs(torque) > 5) {
                 ctx.fillStyle = "#4fd1c5";
                 ctx.beginPath();
@@ -91,7 +85,6 @@ def generate_canvas_html(data, vehicle_type):
                 ctx.lineTo(flameX + (torque>0?5:-5), flameY + 5);
                 ctx.fill();
             }
-            
             ctx.restore();
         }
 
@@ -117,16 +110,17 @@ def generate_canvas_html(data, vehicle_type):
                 status.style.color = "#8ea2ba";
                 
                 currentFrame++;
-                // ~60 FPS playback
                 animationId = setTimeout(() => { requestAnimationFrame(animate); }, 16);
             }
             animate();
         }
         
-        // Draw initial frame
         drawVehicle(data.x[0], data.y[0], 0, 0);
     </script>
     """
+    
+    # Inject the Python variables into the template
+    html = html_template.replace("__DATA__", data_json).replace("__VEHICLE__", vehicle_type)
     return html
 
 # --- GRADIO APP ---
