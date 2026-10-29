@@ -26,111 +26,121 @@ THEME = gr.themes.Monochrome()
 GRADIO_6 = int(gr.__version__.split(".")[0]) >= 6
 
 # --- HTML5 CANVAS RENDERER ---
+import math
+
 def generate_canvas_html(data, vehicle_type):
-    data_json = json.dumps(data)
+    # 1. Sanitize the data to replace NaN with 0.0 (JavaScript cannot parse NaN in JSON)
+    def clean_nans(obj):
+        if isinstance(obj, float) and math.isnan(obj): return 0.0
+        if isinstance(obj, dict): return {k: clean_nans(v) for k, v in obj.items()}
+        if isinstance(obj, list): return [clean_nans(v) for v in obj]
+        return obj
+        
+    clean_data = clean_nans(data)
+    data_json = json.dumps(clean_data)
     
-    # Using standard string and replace() to prevent f-string syntax conflicts with JavaScript
     html_template = """
     <div style="background: #0d1117; border-radius: 10px; padding: 20px; text-align: center; font-family: sans-serif;">
         <canvas id="simCanvas" width="800" height="300" style="background: #161e29; border: 1px solid #2a3444; border-radius: 8px; width: 100%; max-width: 800px;"></canvas>
         <div style="margin-top: 10px; color: #8ea2ba;">
-            <button onclick="playSim()" style="background: #3e6ae1; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">▶ Play Real-Time Simulation</button>
+            <button id="playBtn" style="background: #3e6ae1; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">▶ Play Real-Time Simulation</button>
             <span id="statusText" style="margin-left: 15px; font-weight: bold;"></span>
         </div>
     </div>
     
     <script>
-        const data = __DATA__;
-        const isCar = "__VEHICLE__" === "Car";
-        
-        const canvas = document.getElementById('simCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        let animationId;
-        let currentFrame = 0;
-        
-        const scaleX = 2.0; 
-        const scaleY = 1.5;
-        const centerX = 100;
-        const centerY = 220;
-
-        function drawVehicle(x, y, theta, torque) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = "#253040";
-            ctx.fillRect(0, centerY + 20, canvas.width, 50);
-            
-            ctx.save();
-            let screenX = centerX + (x * scaleX);
-            let screenY = centerY - (y * scaleY);
-            
-            if (screenX > 700) screenX = 700; 
-            
-            ctx.translate(screenX, screenY);
-            ctx.rotate(theta * Math.PI / 180);
-            
-            if (isCar) {
-                ctx.fillStyle = "#e82127";
-                ctx.fillRect(-30, -15, 60, 20);
-                ctx.fillStyle = "#111";
-                ctx.beginPath(); ctx.arc(-20, 5, 8, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(20, 5, 8, 0, Math.PI*2); ctx.fill();
-            } else {
-                ctx.fillStyle = "#e6edf5";
-                ctx.beginPath();
-                ctx.moveTo(0, -30);
-                ctx.lineTo(10, 20);
-                ctx.lineTo(-10, 20);
-                ctx.closePath();
-                ctx.fill();
-            }
-            
-            if (Math.abs(torque) > 5) {
-                ctx.fillStyle = "#4fd1c5";
-                ctx.beginPath();
-                let flameX = torque > 0 ? -15 : 15;
-                let flameY = isCar ? 0 : 20;
-                ctx.moveTo(flameX, flameY);
-                ctx.lineTo(flameX + (torque>0?-10:10), flameY + 15);
-                ctx.lineTo(flameX + (torque>0?5:-5), flameY + 5);
-                ctx.fill();
-            }
-            ctx.restore();
-        }
-
-        function playSim() {
-            cancelAnimationFrame(animationId);
-            currentFrame = 0;
+        // Wrap in an IIFE to avoid global scope pollution
+        (function() {
+            const data = __DATA__;
+            const isCar = "__VEHICLE__" === "Car";
+            const canvas = document.getElementById('simCanvas');
+            const ctx = canvas.getContext('2d');
+            const btn = document.getElementById('playBtn');
             const status = document.getElementById('statusText');
             
-            function animate() {
-                if (currentFrame >= data.time.length) {
-                    status.innerHTML = data.crashed ? "💥 CRASHED" : "✅ STABILIZED";
-                    status.style.color = data.crashed ? "#e82127" : "#4fd1c5";
-                    return;
+            let animationId;
+            let currentFrame = 0;
+            
+            const scaleX = 2.0; 
+            const scaleY = 1.5;
+            const centerX = 100;
+            const centerY = 220;
+
+            function drawVehicle(x, y, theta, torque) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw Ground
+                ctx.fillStyle = "#253040";
+                ctx.fillRect(0, centerY + 20, canvas.width, 50);
+                
+                ctx.save();
+                let screenX = centerX + (x * scaleX);
+                let screenY = centerY - (y * scaleY);
+                if (screenX > 700) screenX = 700; 
+                
+                ctx.translate(screenX, screenY);
+                ctx.rotate(theta * Math.PI / 180);
+                
+                if (isCar) {
+                    ctx.fillStyle = "#e82127";
+                    ctx.fillRect(-30, -15, 60, 20);
+                    ctx.fillStyle = "#111";
+                    ctx.beginPath(); ctx.arc(-20, 5, 8, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(20, 5, 8, 0, Math.PI*2); ctx.fill();
+                } else {
+                    ctx.fillStyle = "#e6edf5";
+                    ctx.beginPath();
+                    ctx.moveTo(0, -30);
+                    ctx.lineTo(10, 20);
+                    ctx.lineTo(-10, 20);
+                    ctx.closePath();
+                    ctx.fill();
                 }
                 
-                let x = data.x[currentFrame];
-                let y = data.y[currentFrame];
-                let theta = data.theta[currentFrame];
-                let torque = data.torque[currentFrame];
-                
-                drawVehicle(x, y, theta, torque);
-                status.innerHTML = `Delay: ${data.delay_ms.toFixed(0)}ms | Tilt: ${theta.toFixed(1)}°`;
-                status.style.color = "#8ea2ba";
-                
-                currentFrame++;
-                animationId = setTimeout(() => { requestAnimationFrame(animate); }, 16);
+                if (Math.abs(torque) > 5) {
+                    ctx.fillStyle = "#4fd1c5";
+                    ctx.beginPath();
+                    let flameX = torque > 0 ? -15 : 15;
+                    let flameY = isCar ? 0 : 20;
+                    ctx.moveTo(flameX, flameY);
+                    ctx.lineTo(flameX + (torque>0?-10:10), flameY + 15);
+                    ctx.lineTo(flameX + (torque>0?5:-5), flameY + 5);
+                    ctx.fill();
+                }
+                ctx.restore();
             }
-            animate();
-        }
-        
-        drawVehicle(data.x[0], data.y[0], 0, 0);
+
+            function playSim() {
+                cancelAnimationFrame(animationId);
+                currentFrame = 0;
+                
+                function animate() {
+                    if (currentFrame >= data.time.length) {
+                        status.innerHTML = data.crashed ? "💥 CRASHED" : "✅ STABILIZED";
+                        status.style.color = data.crashed ? "#e82127" : "#4fd1c5";
+                        return;
+                    }
+                    
+                    drawVehicle(data.x[currentFrame], data.y[currentFrame], data.theta[currentFrame], data.torque[currentFrame]);
+                    status.innerHTML = `Delay: ${data.delay_ms.toFixed(0)}ms | Tilt: ${data.theta[currentFrame].toFixed(1)}°`;
+                    status.style.color = "#8ea2ba";
+                    
+                    currentFrame++;
+                    animationId = setTimeout(() => { requestAnimationFrame(animate); }, 16);
+                }
+                animate();
+            }
+            
+            // Draw the first frame immediately
+            drawVehicle(data.x[0], data.y[0], 0, 0);
+            
+            // Attach the event listener properly
+            btn.addEventListener('click', playSim);
+        })();
     </script>
     """
     
-    html = html_template.replace("__DATA__", data_json).replace("__VEHICLE__", vehicle_type)
-    return html
+    return html_template.replace("__DATA__", data_json).replace("__VEHICLE__", vehicle_type)
 
 # --- GRADIO APP ---
 def run_visual_sim(controller, vehicle_type, delay_ms, wind, g_force):
