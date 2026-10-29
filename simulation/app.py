@@ -1,149 +1,180 @@
 try:
     import spaces
-    # This decorator tells Hugging Face ZeroGPU to use the GPU for these functions
-    def gpu_decorator(func):
-        return spaces.GPU(func)
-except ImportError:  # Local CPU fallback
-    def gpu_decorator(func):
-        return func
+    def gpu_decorator(func): return spaces.GPU(func)
+except ImportError:
+    def gpu_decorator(func): return func
 
 import gradio as gr
+import json
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-
-from physics_engine import (CRASH_DEG, IMPULSE_START, PROFILES, run_monte_carlo,
-                            simulate_emergency, stability_map)
+from physics_engine import CRASH_DEG, PROFILES, simulate_emergency, run_monte_carlo
 
 CONTROLLERS = list(PROFILES)
-COLORS = {"Human": "#f59e0b", "Physical AI (IMU)": "#8b5cf6", "Physical AI (Vision)": "#38bdf8"}
 THEME = gr.themes.Monochrome()
 GRADIO_6 = int(gr.__version__.split(".")[0]) >= 6
 
-def _style(fig, height=430):
-    fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                      plot_bgcolor="rgba(0,0,0,0)", height=height,
-                      margin=dict(l=20, r=20, t=50, b=20),
-                      legend=dict(orientation="h", y=-0.15))
-    return fig
+# --- HTML5 CANVAS RENDERER ---
+def generate_canvas_html(data, vehicle_type):
+    # We dump the Python data into a JSON string for JavaScript to read
+    data_json = json.dumps(data)
+    
+    html = f"""
+    <div style="background: #0d1117; border-radius: 10px; padding: 20px; text-align: center; font-family: sans-serif;">
+        <canvas id="simCanvas" width="800" height="300" style="background: #161e29; border: 1px solid #2a3444; border-radius: 8px; width: 100%; max-width: 800px;"></canvas>
+        <div style="margin-top: 10px; color: #8ea2ba;">
+            <button onclick="playSim()" style="background: #3e6ae1; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">▶ Play Real-Time Simulation</button>
+            <span id="statusText" style="margin-left: 15px; font-weight: bold;"></span>
+        </div>
+    </div>
+    
+    <script>
+        const data = {data_json};
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const isCar = "{vehicle_type}" === "Car";
+        
+        let animationId;
+        let currentFrame = 0;
+        
+        // Scaling factors for the canvas
+        const scaleX = 2.0; 
+        const scaleY = 1.5;
+        const centerX = 100;
+        const centerY = 220;
 
-def _empty(msg):
-    return _style(go.Figure()), f"**Error:** {msg}"
+        function drawVehicle(x, y, theta, torque) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Ground
+            ctx.fillStyle = "#253040";
+            ctx.fillRect(0, centerY + 20, canvas.width, 50);
+            
+            ctx.save();
+            // Translate to the vehicle's current position on screen
+            let screenX = centerX + (x * scaleX);
+            let screenY = centerY - (y * scaleY);
+            
+            // Prevent it from flying off screen
+            if (screenX > 700) screenX = 700; 
+            
+            ctx.translate(screenX, screenY);
+            ctx.rotate(theta * Math.PI / 180);
+            
+            if (isCar) {
+                // Draw Tesla
+                ctx.fillStyle = "#e82127";
+                ctx.fillRect(-30, -15, 60, 20);
+                // Wheels
+                ctx.fillStyle = "#111";
+                ctx.beginPath(); ctx.arc(-20, 5, 8, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(20, 5, 8, 0, Math.PI*2); ctx.fill();
+            } else {
+                // Draw Rocket
+                ctx.fillStyle = "#e6edf5";
+                ctx.beginPath();
+                ctx.moveTo(0, -30);
+                ctx.lineTo(10, 20);
+                ctx.lineTo(-10, 20);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Draw Thrusters based on control torque
+            if (Math.abs(torque) > 5) {
+                ctx.fillStyle = "#4fd1c5";
+                ctx.beginPath();
+                let flameX = torque > 0 ? -15 : 15;
+                let flameY = isCar ? 0 : 20;
+                ctx.moveTo(flameX, flameY);
+                ctx.lineTo(flameX + (torque>0?-10:10), flameY + 15);
+                ctx.lineTo(flameX + (torque>0?5:-5), flameY + 5);
+                ctx.fill();
+            }
+            
+            ctx.restore();
+        }
 
-def default_delay(controller):
-    return PROFILES[controller]["delay_ms"]
+        function playSim() {
+            cancelAnimationFrame(animationId);
+            currentFrame = 0;
+            const status = document.getElementById('statusText');
+            
+            function animate() {
+                if (currentFrame >= data.time.length) {
+                    status.innerHTML = data.crashed ? "💥 CRASHED" : "✅ STABILIZED";
+                    status.style.color = data.crashed ? "#e82127" : "#4fd1c5";
+                    return;
+                }
+                
+                let x = data.x[currentFrame];
+                let y = data.y[currentFrame];
+                let theta = data.theta[currentFrame];
+                let torque = data.torque[currentFrame];
+                
+                drawVehicle(x, y, theta, torque);
+                status.innerHTML = `Delay: ${data.delay_ms.toFixed(0)}ms | Tilt: ${theta.toFixed(1)}°`;
+                status.style.color = "#8ea2ba";
+                
+                currentFrame++;
+                // ~60 FPS playback
+                animationId = setTimeout(() => { requestAnimationFrame(animate); }, 16);
+            }
+            animate();
+        }
+        
+        // Draw initial frame
+        drawVehicle(data.x[0], data.y[0], 0, 0);
+    </script>
+    """
+    return html
 
-# ---------- Tab 1: single run ----------
-def run_single(controller, delay_ms, wind, g_force, compare):
-    try:
-        main = simulate_emergency(controller, wind, g_force, delay_ms)
-        runs = {controller: main}
-        if compare:
-            for c in CONTROLLERS:
-                if c != controller:
-                    runs[c] = simulate_emergency(c, wind, g_force, 0)
+# --- GRADIO APP ---
+def run_visual_sim(controller, vehicle_type, delay_ms, wind, g_force):
+    data = simulate_emergency(controller, vehicle_type, wind, g_force, delay_ms)
+    html_output = generate_canvas_html(data, vehicle_type)
+    
+    # Generate Plotly Chart alongside
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.7, 0.3], vertical_spacing=0.1)
+    color = PROFILES.get(controller, {}).get("color", "#8b5cf6")
+    if controller == "Human": color = "#f59e0b"
+    
+    fig.add_trace(go.Scatter(x=data["time"], y=data["theta"], name="Tilt", line=dict(color=color, width=3)), row=1, col=1)
+    fig.add_trace(go.Scatter(x=data["time"], y=data["torque"], name="Thrust", line=dict(color="#4fd1c5", width=2)), row=2, col=1)
+    
+    fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", height=400, showlegend=False)
+    fig.update_yaxes(title_text="Tilt (°)", row=1, col=1)
+    fig.update_yaxes(title_text="Thrust", row=2, col=1)
+    
+    return html_output, fig
 
-        fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.65, 0.35],
-                            vertical_spacing=0.08,
-                            subplot_titles=("Vehicle tilt (degrees)", "Control effort"))
-        for name, r in runs.items():
-            sel = name == controller
-            fig.add_trace(go.Scatter(x=r["time"], y=r["theta"], name=name, mode="lines",
-                                     line=dict(color=COLORS[name], width=4 if sel else 2,
-                                               dash="solid" if sel else "dot")), row=1, col=1)
-            fig.add_trace(go.Scatter(x=r["time"], y=r["torque"], name=name, mode="lines",
-                                     showlegend=False,
-                                     line=dict(color=COLORS[name], width=2 if sel else 1)), row=2, col=1)
-        fig.add_hrect(y0=CRASH_DEG, y1=90, fillcolor="red", opacity=0.12, line_width=0, row=1, col=1)
-        fig.add_hrect(y0=-90, y1=-CRASH_DEG, fillcolor="red", opacity=0.12, line_width=0, row=1, col=1)
-        fig.add_vline(x=IMPULSE_START, line_dash="dash", line_color="yellow", row=1, col=1,
-                      annotation_text="Wind gust", annotation_position="top right")
-        fig.update_yaxes(range=[-90, 90], row=1, col=1)
-        fig.update_xaxes(title_text="Time (s)", row=2, col=1)
-        _style(fig, 520)
-
-        status = "💥 **CRASHED**" if main["crashed"] else "✅ **Stabilized**"
-        md = (f"{status} &nbsp; | &nbsp; **Peak tilt:** {'>90' if main['peak_deg'] > 90 else format(main['peak_deg'], '.1f')}° &nbsp; | &nbsp; "
-              f"**Effective delay:** {main['delay_ms']:.0f} ms &nbsp; | &nbsp; "
-              f"**Mean effort:** {main['effort']:.1f}")
-        return fig, md
-    except Exception as e:
-        return _empty(e)
-
-# ---------- Tab 2: Monte Carlo (GPU Accelerated) ----------
-@gpu_decorator
-def run_mc(controller, wind, g_force, trials):
-    try:
-        top = 350 if controller == "Human" else 400
-        res = run_monte_carlo(controller, wind, g_force, delays=np.linspace(10, top, 30),
-                              trials=int(trials))
-        fig = go.Figure(go.Scatter(x=res["delays"], y=res["survival"], mode="lines+markers",
-                                   line=dict(color=COLORS[controller], width=3), name="Survival"))
-        fig.add_hline(y=50, line_dash="dash", line_color="yellow", annotation_text="50% survival")
-        fig.update_layout(title=f"Survival probability vs reaction delay: {controller}",
-                          xaxis_title="Base reaction delay (ms)", yaxis_title="Survival (%)",
-                          yaxis_range=[-2, 102])
-        crit = res["critical_ms"]
-        md = (f"**Critical delay (survival drops below 50%):** ~{crit:.0f} ms" if crit
-              else "**No critical delay in this range.** Survival stays at 50% or higher.")
-        md += f"\n\n*Each point is {int(trials)} runs. PyTorch GPU Tensors accelerated this calculation.*"
-        return _style(fig), md
-    except Exception as e:
-        return _empty(e)
-
-# ---------- Tab 3: stability map (GPU Accelerated) ----------
-@gpu_decorator
-def run_map(controller, g_force):
-    try:
-        res = stability_map(controller, g_force)
-        fig = go.Figure(go.Heatmap(x=res["delays"], y=res["winds"], z=res["peak"],
-                                   colorscale="Turbo", zmin=0, zmax=90,
-                                   colorbar=dict(title="Peak tilt (°)")))
-        fig.add_trace(go.Contour(x=res["delays"], y=res["winds"], z=res["peak"],
-                                 contours=dict(start=CRASH_DEG, end=CRASH_DEG, size=1, coloring="none"),
-                                 line=dict(color="white", width=3, dash="dash"),
-                                 showscale=False, name="Crash boundary"))
-        fig.update_layout(title=f"Stability map: {controller}",
-                          xaxis_title="Reaction delay (ms)", yaxis_title="Wind impulse strength")
-        return _style(fig, 480), ("Below and left of the dashed line the vehicle survives. "
-                                  "Faster controllers push the boundary far to the right.")
-    except Exception as e:
-        return _empty(e)
-
-blocks_kwargs = {} if GRADIO_6 else {"theme": THEME}
-launch_kwargs = {"theme": THEME} if GRADIO_6 else {}
-
-with gr.Blocks(title="Physical AI vs Human", **blocks_kwargs) as demo:
-    gr.Markdown(
-        "# 🚗⚡ Physical AI vs Human: The Reaction-Time Gap\n"
-        "**Tesla's mission is to build a world of amazing abundance, and Physical AI is how it gets there.** "
-        "This simulation measures that gap using a GPU-accelerated inverted pendulum physics engine."
-    )
+with gr.Blocks(theme=THEME, title="Physical AI Visual Simulator") as demo:
+    gr.Markdown("# 🏎️🚀 Real-Time Physical AI Simulator")
+    gr.Markdown("Watch how a Tesla Roadster or SpaceX Falcon 9 handles an emergency mid-air crosswind. Click **Play** to see the AI react in real-time.")
     
     with gr.Row():
-        controller = gr.Dropdown(CONTROLLERS, value="Human", label="Controller")
-        delay = gr.Slider(1, 400, value=200, step=1, label="Reaction delay (ms)")
-        wind = gr.Slider(1, 30, value=10, step=1, label="Wind impulse strength")
-        g_force = gr.Slider(1, 9, value=1, step=0.5, label="Sustained G-load (humans only)")
+        with gr.Column():
+            vehicle_type = gr.Radio(["Car", "Rocket"], value="Car", label="Select Vehicle")
+            controller = gr.Dropdown(CONTROLLERS, value="Human", label="Controller")
+            delay = gr.Slider(1, 400, value=200, step=1, label="Reaction Delay (ms)")
+            wind = gr.Slider(1, 30, value=10, step=1, label="Wind Impulse")
+            g_force = gr.Slider(1, 9, value=1, step=0.5, label="G-Force")
+            run_btn = gr.Button("Simulate", variant="primary")
+            
+    # The Canvas HTML
+    canvas_out = gr.HTML(label="Real-Time Render")
+    
+    # The Physics Graph
+    plot_out = gr.Plot(label="Telemetry Data")
 
-    with gr.Tabs():
-        with gr.Tab("Single run"):
-            compare = gr.Checkbox(value=True, label="Overlay the other controllers")
-            run_btn = gr.Button("Run simulation", variant="primary")
-            plot1, md1 = gr.Plot(), gr.Markdown()
-        with gr.Tab("Monte Carlo (GPU)"):
-            trials = gr.Slider(10, 100, value=40, step=10, label="Trials per delay")
-            mc_btn = gr.Button("Run Monte Carlo", variant="primary")
-            plot2, md2 = gr.Plot(), gr.Markdown()
-        with gr.Tab("Stability map (GPU)"):
-            map_btn = gr.Button("Build map", variant="primary")
-            plot3, md3 = gr.Plot(), gr.Markdown()
-
-    controller.change(default_delay, controller, delay)
-    single_in = [controller, delay, wind, g_force, compare]
-    run_btn.click(run_single, single_in, [plot1, md1])
-    mc_btn.click(run_mc, [controller, wind, g_force, trials], [plot2, md2])
-    map_btn.click(run_map, [controller, g_force], [plot3, md3])
-    demo.load(run_single, single_in, [plot1, md1])
+    run_btn.click(
+        run_visual_sim, 
+        inputs=[controller, vehicle_type, delay, wind, g_force], 
+        outputs=[canvas_out, plot_out]
+    )
+    
+    # Auto-run on load
+    demo.load(run_visual_sim, inputs=[controller, vehicle_type, delay, wind, g_force], outputs=[canvas_out, plot_out])
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", **launch_kwargs)
+    demo.launch(server_name="0.0.0.0")
