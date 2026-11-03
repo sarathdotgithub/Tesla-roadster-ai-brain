@@ -2,7 +2,7 @@
 
 # 🧠 The Flying Tesla Has an AI Brain
 
-**Everyone saw the jump. Nobody saw the control system.**
+**The physical AI behind the jump.**
 
 [![Live Page](https://img.shields.io/badge/🌐_Live_Page-Visit-8b5cf6?style=for-the-badge)](https://YOUR-USERNAME.github.io/tesla-roadster-ai-brain/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-3e6ae1?style=for-the-badge)](LICENSE)
