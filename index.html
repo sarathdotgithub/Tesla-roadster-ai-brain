@@ -103,6 +103,20 @@
     transform: translateY(-1px);
   }
 
+  .navlinks a.hf-btn {
+    color: var(--bg);
+    background: var(--ai);
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 800;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .navlinks a.hf-btn:hover {
+    background: #a78bfa;
+    transform: translateY(-1px);
+  }
+
   /* ---------- HERO ---------- */
   .hero {
     position: relative;
@@ -222,6 +236,24 @@
   .chip.hero-repo-link:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(62, 106, 225, 0.4);
+  }
+
+  .chip.hero-hf-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ai);
+    color: #fff;
+    border-color: transparent;
+    text-decoration: none;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    margin-right: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .chip.hero-hf-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
   }
 
   /* ---------- LAYOUT ---------- */
@@ -539,6 +571,18 @@
   .suction .system-verb { color: #7fe8dd; }
   .precedent-note { margin-top: 22px; padding: 20px 24px; background: rgba(79, 209, 197, 0.06); border: 1px solid rgba(79, 209, 197, 0.22); border-left: 3px solid var(--gas); border-radius: 0 12px 12px 0; font-size: 0.92rem; color: var(--muted); line-height: 1.65; }
   .precedent-note strong { color: #7fe8dd; }
+  .precedent-note a { color: var(--gas); font-weight: 600; text-decoration: none; }
+  .precedent-note a:hover { text-decoration: underline; }
+
+  /* Amber variant for privacy note */
+  .precedent-note.amber {
+    background: rgba(245, 165, 36, 0.06);
+    border-color: rgba(245, 165, 36, 0.22);
+    border-left-color: var(--amber);
+  }
+  .precedent-note.amber strong { color: #ffd08a; }
+  .precedent-note.amber a { color: var(--amber); font-weight: 600; text-decoration: none; }
+  .precedent-note.amber a:hover { text-decoration: underline; }
 
   /* ---------- JUMP ANIMATION ---------- */
   .jump-wrap { margin-top: 34px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 24px 14px; overflow: hidden; }
@@ -620,10 +664,13 @@
   <nav class="navlinks">
     <a href="#contrast">The Real Story</a>
     <a href="#brain">AI Brain</a>
+    <a href="#ooda">OODA Loop</a>
     <a href="#muscles">Hardware</a>
     <a href="#inverted">Suction Grip</a>
     <a href="#efficiency">Efficiency</a>
+    <a href="#privacy">Local AI</a>
     <a href="#references">References</a>
+    <a href="https://huggingface.co/spaces/sarathra/tesla-roadster-ai-brain" target="_blank" rel="noopener" class="hf-btn">🤗 Play Simulation</a>
     <a href="https://github.com/sarathdotgithub/Tesla-roadster-ai-brain" target="_blank" rel="noopener" class="repo-btn">GitHub Repo ↗</a>
   </nav>
 </div>
@@ -643,6 +690,10 @@
       Here's the tech stack driving the "crazy stuff."
     </p>
     <div class="chip-row">
+      <a href="https://huggingface.co/spaces/sarathra/tesla-roadster-ai-brain" target="_blank" rel="noopener" class="chip hero-hf-link">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right:4px;"><path d="M8 5v14l11-7z"/></svg>
+        Play the AI Simulation
+      </a>
       <a href="https://github.com/sarathdotgithub/Tesla-roadster-ai-brain" target="_blank" rel="noopener" class="chip hero-repo-link">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right:4px;"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
         View the GitHub Repo
@@ -782,10 +833,156 @@
     </div>
   </section>
 
+  <!-- ================= OODA LOOP / CYBERCAB ================= -->
+  <section id="ooda">
+    <div class="section-head">
+      <span class="num">02</span>
+      <h2>The Same AI Brain, Already on the Road: OODA in the Cybercab</h2>
+    </div>
+    <p class="section-sub">
+      Tesla hasn't released the Roadster's flight software — but it <strong>has</strong> shipped the most
+      advanced Physical AI it builds today: <strong>FSD v12 and the Cybercab</strong>. Both run on the same
+      architecture as the Roadster's brain — the <strong>OODA Loop</strong> (Observe → Orient → Decide → Act → Repeat).
+    </p>
+
+    <div class="card-grid">
+      <article class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <h3>1. Observe</h3>
+        <p><strong>8 cameras</strong> capture the world in 360°. An <strong>IMU</strong> tracks the vehicle's exact physics frame by frame.</p>
+      </article>
+
+      <article class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1.6"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.6"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.6"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.6"/>
+          </svg>
+        </div>
+        <h3>2. Orient</h3>
+        <p>A neural network (<strong>HydraNet</strong>) fuses the 2D images into a 3D <strong>Occupancy Network</strong> — the exact shape and volume of the world.</p>
+      </article>
+
+      <article class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3a5 5 0 0 0-5 5c0 2 1 3 2 4v3h6v-3c1-1 2-2 2-4a5 5 0 0 0-5-5z"/>
+            <path d="M9 18h6M10 21h4"/>
+          </svg>
+        </div>
+        <h3>3. Decide</h3>
+        <p>The <strong>End-to-End Neural Network (FSD v12)</strong> reads pixels and outputs steering + acceleration directly. <strong>No hard-coded rules</strong> — just millions of hours of driving experience.</p>
+      </article>
+
+      <article class="card gas">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13l0-8z"/>
+          </svg>
+        </div>
+        <h3>4. Act</h3>
+        <p>Digital signals drive <strong>Steer-by-Wire</strong> and <strong>Brake-by-Wire</strong> actuators, adjusting the wheel with millimeter precision <strong>100 times per second</strong>.</p>
+      </article>
+
+      <article class="card amb">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-3-6.7"/>
+            <path d="M21 3v6h-6"/>
+          </svg>
+        </div>
+        <h3>5. Repeat &amp; Learn</h3>
+        <p>The Cybercab clips <strong>corner cases</strong> and ships them to the <strong>Dojo supercomputer</strong>, retraining the AI overnight.</p>
+      </article>
+    </div>
+
+    <div class="diagram-wrap">
+      <svg class="fusion-svg" viewBox="0 0 900 200" role="img" aria-label="OODA Loop: Observe, Orient, Decide, Act, Learn">
+        <rect x="20"  y="50" width="140" height="52" rx="10" fill="#131b26" stroke="rgba(62,106,225,0.65)" stroke-width="1.5"/>
+        <text x="90"  y="76" fill="#cfdae7" font-size="13" font-weight="700" text-anchor="middle" font-family="inherit">Observe</text>
+        <text x="90"  y="91" fill="#8ea2ba" font-size="9" text-anchor="middle" font-family="inherit">8 cams · IMU</text>
+
+        <rect x="200" y="50" width="140" height="52" rx="10" fill="#131b26" stroke="rgba(139,92,246,0.65)" stroke-width="1.5"/>
+        <text x="270" y="76" fill="#cfdae7" font-size="13" font-weight="700" text-anchor="middle" font-family="inherit">Orient</text>
+        <text x="270" y="91" fill="#8ea2ba" font-size="9" text-anchor="middle" font-family="inherit">HydraNet · Occupancy</text>
+
+        <rect x="380" y="50" width="140" height="52" rx="10" fill="#131b26" stroke="rgba(139,92,246,0.65)" stroke-width="1.5"/>
+        <text x="450" y="76" fill="#cfdae7" font-size="13" font-weight="700" text-anchor="middle" font-family="inherit">Decide</text>
+        <text x="450" y="91" fill="#8ea2ba" font-size="9" text-anchor="middle" font-family="inherit">FSD v12 · End-to-End</text>
+
+        <rect x="560" y="50" width="140" height="52" rx="10" fill="#131b26" stroke="rgba(79,209,197,0.65)" stroke-width="1.5"/>
+        <text x="630" y="76" fill="#cfdae7" font-size="13" font-weight="700" text-anchor="middle" font-family="inherit">Act</text>
+        <text x="630" y="91" fill="#8ea2ba" font-size="9" text-anchor="middle" font-family="inherit">Steer · Brake-by-Wire</text>
+
+        <rect x="740" y="50" width="140" height="52" rx="10" fill="#131b26" stroke="rgba(245,165,36,0.65)" stroke-width="1.5"/>
+        <text x="810" y="76" fill="#cfdae7" font-size="13" font-weight="700" text-anchor="middle" font-family="inherit">Learn</text>
+        <text x="810" y="91" fill="#8ea2ba" font-size="9" text-anchor="middle" font-family="inherit">Dojo · Overnight</text>
+
+        <path d="M160 76 L200 76" fill="none" stroke="#3e6ae1" stroke-width="2" stroke-linecap="round" stroke-dasharray="7 9">
+          <animate attributeName="stroke-dashoffset" from="0" to="-32" dur="1.1s" repeatCount="indefinite"/>
+        </path>
+        <path d="M340 76 L380 76" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-dasharray="7 9">
+          <animate attributeName="stroke-dashoffset" from="0" to="-32" dur="1.1s" repeatCount="indefinite"/>
+        </path>
+        <path d="M520 76 L560 76" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-dasharray="7 9">
+          <animate attributeName="stroke-dashoffset" from="0" to="-32" dur="1.1s" repeatCount="indefinite"/>
+        </path>
+        <path d="M700 76 L740 76" fill="none" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-dasharray="7 9">
+          <animate attributeName="stroke-dashoffset" from="0" to="-32" dur="1.1s" repeatCount="indefinite"/>
+        </path>
+
+        <path d="M810 102 C 810 170, 90 170, 90 102" fill="none" stroke="#f5a524" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.7"/>
+        <text x="450" y="160" fill="#f5a524" font-size="9" text-anchor="middle" font-family="inherit" letter-spacing="0.1em">CORNER CASES → RETRAIN</text>
+      </svg>
+      <div class="diagram-caption">Observe → Orient → Decide → Act → Learn</div>
+    </div>
+
+    <div class="system-split">
+      <div class="system-panel suction">
+        <span class="system-tag">Outer Loop — Vision AI</span>
+        <h3>Plans where to go</h3>
+        <ul>
+          <li>FSD v12 + Cybercab</li>
+          <li>HydraNet → Occupancy Network</li>
+          <li>End-to-End steering &amp; acceleration</li>
+        </ul>
+        <span class="system-verb">Decides the trajectory</span>
+      </div>
+      <div class="system-panel thrust">
+        <span class="system-tag">Inner Loop — Physics AI</span>
+        <h3>Reacts in milliseconds</h3>
+        <ul>
+          <li>IMU + gyroscope</li>
+          <li>Suction + thruster modulation</li>
+          <li>Active mid-air stabilization</li>
+        </ul>
+        <span class="system-verb">Keeps the car alive when physics goes wrong</span>
+      </div>
+    </div>
+
+    <div class="precedent-note">
+      <strong>The engineering takeaway:</strong> A vehicle needs two brains. The <strong>Outer Loop</strong>
+      (Vision AI) plans the journey. The <strong>Inner Loop</strong> (IMU / Physics AI) reacts in milliseconds
+      when things go wrong. A human has a ~200 ms delay; conventional automation (bang-bang relays) overshoots.
+      Only a learned controller can stabilize a vehicle mid-air.
+      <br><br>
+      <strong>Watch it happen:</strong> an interactive physics simulation was built to visualize the Inner
+      Loop — a physical AI controller stabilizes a vehicle mid-air where a human and bang-bang automation fail.
+      <a href="https://lnkd.in/e2d4vzqh" target="_blank" rel="noopener">Play the simulation ↗</a>
+    </div>
+  </section>
+
   <!-- ================= MUSCLES ================= -->
   <section id="muscles">
     <div class="section-head">
-      <span class="num gas">02</span>
+      <span class="num gas">03</span>
       <h2>The Muscles: Pneumatics, Actuators &amp; Thrusters</h2>
     </div>
     <p class="section-sub">
@@ -860,7 +1057,7 @@
   <!-- ================= INVERTED DRIVE ================= -->
   <section id="inverted">
     <div class="section-head">
-      <span class="num gas">03</span>
+      <span class="num gas">04</span>
       <h2>Why It Doesn't Fall: The Suction Fan System</h2>
     </div>
     <p class="section-sub">
@@ -954,7 +1151,7 @@
 
     <div class="precedent-note">
       <strong>Real-world precedent:</strong> The <strong>McMurtry Spéirling</strong>, an electric
-      hypercar, demonstrated the same principle in 2025 — using its “Downforce-on-Demand” fan system
+      hypercar, demonstrated the same principle in 2025 — using its "Downforce-on-Demand" fan system
       to generate ~2,000 kg of downforce while stationary and drive inverted. Tesla's system follows
       the same aerodynamic logic.
     </div>
@@ -963,7 +1160,7 @@
   <!-- ================= EFFICIENCY ================= -->
   <section id="efficiency">
     <div class="section-head">
-      <span class="num">04</span>
+      <span class="num">05</span>
       <h2>How Efficient Is AI Here? It's the Enabling Layer.</h2>
     </div>
     <p class="section-sub">
@@ -1039,7 +1236,7 @@
   <!-- ================= RECAP ================= -->
   <section id="recap">
     <div class="section-head">
-      <span class="num red">05</span>
+      <span class="num red">06</span>
       <h2>The Recap: What Was Actually Demonstrated</h2>
     </div>
     <p class="section-sub">
@@ -1053,7 +1250,7 @@
       </div>
       <div style="display:flex;gap:18px;align-items:flex-start;background:var(--bg-elevated);border:1px solid var(--border);border-left:3px solid var(--tesla-red);border-radius:12px;padding:20px 22px;">
         <span style="font-family:ui-monospace,monospace;font-size:0.8rem;font-weight:800;color:var(--tesla-red);min-width:26px;padding-top:3px;">02</span>
-        <p style="font-size:0.95rem;color:#cfdae7;">Jumping over a line of parked Teslas with a “kickflip”-style manoeuvre.</p>
+        <p style="font-size:0.95rem;color:#cfdae7;">Jumping over a line of parked Teslas with a "kickflip"-style manoeuvre.</p>
       </div>
       <div style="display:flex;gap:18px;align-items:flex-start;background:var(--bg-elevated);border:1px solid var(--border);border-left:3px solid var(--tesla-red);border-radius:12px;padding:20px 22px;">
         <span style="font-family:ui-monospace,monospace;font-size:0.8rem;font-weight:800;color:var(--tesla-red);min-width:26px;padding-top:3px;">03</span>
@@ -1102,7 +1299,7 @@
         <h3>Not Road-Legal</h3>
         <p>
           Tesla's own configurator states the thruster package is
-          <strong>“not approved for public road use”</strong>.
+          <strong>"not approved for public road use"</strong>.
         </p>
       </article>
     </div>
@@ -1131,9 +1328,67 @@
       <p>
         The thrusters got the headlines. The AI made the manoeuvre — and the inverted drive — possible.
       </p>
+      <p style="margin-top: 16px;">
+        👉 <a href="https://huggingface.co/spaces/sarathra/tesla-roadster-ai-brain" target="_blank" rel="noopener" style="color: var(--ai); text-decoration: none; font-weight: 700;">Play the live real-time simulation here ↗</a>
+      </p>
       <p class="hash">#PhysicalAI #ArtificialIntelligence #Tesla #SpaceX #IoT #Engineering #Robotics #TheCrazyStuff</p>
     </div>
   </div>
+
+  <!-- ================= LOCAL AI FOR PRIVACY ================= -->
+  <section id="privacy">
+    <div class="section-head">
+      <span class="num amb">07</span>
+      <h2>Behind the Scenes: Local AI for Privacy</h2>
+    </div>
+    <p class="section-sub">
+      Building and debugging the physics engine behind this simulation didn't require shipping proprietary
+      code or API keys to a cloud server. The whole workflow ran <strong>offline</strong>.
+    </p>
+
+    <div class="card-grid">
+      <article class="card amb">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7l8-4 8 4v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V7z"/>
+            <path d="M9 12l2.2 2.2L15.5 10"/>
+          </svg>
+        </div>
+        <h3>Qwen 2.5 Running Locally</h3>
+        <p><strong>Qwen 2.5</strong> was deployed on-machine via <strong>Ollama</strong> — the LLM runs fully offline, no remote calls.</p>
+      </article>
+
+      <article class="card amb">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="4" y="10" width="16" height="11" rx="2"/>
+            <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+            <circle cx="12" cy="15.5" r="1.2" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+        <h3>100% Data Privacy</h3>
+        <p>No code, no API keys, no proprietary data left the machine. Full <strong>code security</strong> and <strong>data privacy</strong> by design.</p>
+      </article>
+
+      <article class="card amb">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 6l-5 6 5 6M16 6l5 6-5 6"/>
+            <path d="M14 4l-4 16"/>
+          </svg>
+        </div>
+        <h3>AI-Assisted Coding, Offline</h3>
+        <p>Full AI pair-programming capability with an <strong>air-gapped workflow</strong> — useful when your project is the product.</p>
+      </article>
+    </div>
+
+    <div class="precedent-note amber">
+      <strong>Links:</strong><br>
+      • Local LLM setup — <a href="https://lnkd.in/eCVGkpgf" target="_blank" rel="noopener">lnkd.in/eCVGkpgf</a><br>
+      • Play the physics simulation — <a href="https://lnkd.in/e2d4vzqh" target="_blank" rel="noopener">lnkd.in/e2d4vzqh</a><br>
+      • Explore the code — <a href="https://lnkd.in/eZTSXF8p" target="_blank" rel="noopener">lnkd.in/eZTSXF8p</a>
+    </div>
+  </section>
 
   <!-- ================= REFERENCES ================= -->
   <section id="references">
@@ -1152,7 +1407,7 @@
           1. TechCrunch<span class="arrow">↗</span>
         </a>
         <div class="desc">
-          “Tesla reveals SpaceX-powered Roadster that flies and falls with style” (Oct 15, 2026).
+          "Tesla reveals SpaceX-powered Roadster that flies and falls with style" (Oct 15, 2026).
           Confirms the 10 cold-gas thrusters, 600L compressed air, and the three trim levels
           (Performance, Thrust, Rocket).
         </div>
@@ -1164,8 +1419,8 @@
           2. Engadget<span class="arrow">↗</span>
         </a>
         <div class="desc">
-          “Tesla's redesigned Roadster has a cold-gas thruster option...” (Oct 16, 2026).
-          Confirms the all-electric actuators enabling “micro adjustments within a fraction of a second.”
+          "Tesla's redesigned Roadster has a cold-gas thruster option..." (Oct 16, 2026).
+          Confirms the all-electric actuators enabling "micro adjustments within a fraction of a second."
         </div>
         <a class="url" href="https://www.engadget.com/2288437/teslas-redesigned-roadster-cold-gas-thruster-option-reservation/" target="_blank" rel="noopener">https://www.engadget.com/2288437/teslas-redesigned-roadster-cold-gas-thruster-option-reservation/</a>
       </div>
@@ -1175,7 +1430,7 @@
           3. AVweb<span class="arrow">↗</span>
         </a>
         <div class="desc">
-          “Tesla Roadster Takes Flight” (Oct 16, 2026). Aviation-industry coverage confirming the
+          "Tesla Roadster Takes Flight" (Oct 16, 2026). Aviation-industry coverage confirming the
           600L capacity in two pressure vessels and 10 thruster nozzles (statement from VP Lars Moravy).
         </div>
         <a class="url" href="https://avweb.com/aviation-news/tesla-roadster-takes-flight/" target="_blank" rel="noopener">https://avweb.com/aviation-news/tesla-roadster-takes-flight/</a>
@@ -1186,8 +1441,8 @@
           4. Torque News<span class="arrow">↗</span>
         </a>
         <div class="desc">
-          “Tesla Unveiled Its 'Flying' 0.8-Second SpaceX Roadster...” (Oct 16, 2026).
-          Source for the explicit “not approved for public road use” disclaimer from Tesla's
+          "Tesla Unveiled Its 'Flying' 0.8-Second SpaceX Roadster..." (Oct 16, 2026).
+          Source for the explicit "not approved for public road use" disclaimer from Tesla's
           configuration portal.
         </div>
         <a class="url" href="https://www.torquenews.com/18013/tesla-unveiled-its-flying-08-second-spacex-roadster-fine-print-says-it-isn-t-approved-public" target="_blank" rel="noopener">https://www.torquenews.com/18013/tesla-unveiled-its-flying-08-second-spacex-roadster-fine-print-says-it-isn-t-approved-public</a>
@@ -1198,7 +1453,7 @@
           5. Universe Magazine<span class="arrow">↗</span>
         </a>
         <div class="desc">
-          “Tesla Roadster learns to fly: how SpaceX helped create the car of the future” (Oct 16, 2026).
+          "Tesla Roadster learns to fly: how SpaceX helped create the car of the future" (Oct 16, 2026).
           Explains the attitude-control principle (similar to Falcon 9's cold-gas thrusters) and notes
           Tesla has not disclosed the precise stabilization algorithms.
         </div>
@@ -1233,7 +1488,7 @@
         </a>
         <div class="desc">
           The McMurtry Spéirling demonstrated the same active-suction principle in 2025 — generating
-          ~2,000 kg of stationary downforce using its “Downforce-on-Demand” fan system, and driving
+          ~2,000 kg of stationary downforce using its "Downforce-on-Demand" fan system, and driving
           inverted to prove it.
         </div>
         <a class="url" href="https://www.mcmurtry.com/" target="_blank" rel="noopener">https://www.mcmurtry.com/</a>
@@ -1241,11 +1496,14 @@
 
       <div class="ref-note">
         <strong style="color:#8ea2ba;">Note:</strong> Tesla has not publicly released the exact AI control
-        algorithms or sensor-fusion architecture used during the jump or the inverted drive. The “AI brain”
+        algorithms or sensor-fusion architecture used during the jump or the inverted drive. The "AI brain"
         explanation on this page is an accurate synthesis of the system's publicly described behaviour,
         not a disclosure of proprietary code. The inverted-drive explanation describes the confirmed
         physical principle (active suction / low-pressure adhesion) demonstrated by Tesla and, separately,
-        by the McMurtry Spéirling.
+        by the McMurtry Spéirling. The OODA Loop / FSD v12 / Cybercab explanation (Section 02) reflects
+        publicly available descriptions of Tesla's shipping autonomy stack, not the Roadster's flight software.
+        The local-AI workflow described in Section 07 (Qwen 2.5 + Ollama) refers to the author's
+        own development toolchain, not Tesla's internal systems.
       </div>
     </div>
   </section>
@@ -1255,7 +1513,14 @@
 <footer>
   <p>Tesla Roadster · Cold-Gas Thrusters, Suction Grip &amp; AI Control System · Explained</p>
   <p style="margin-top: 10px;">
+    <strong>Live Simulation:</strong> <a href="https://huggingface.co/spaces/sarathra/tesla-roadster-ai-brain" target="_blank" rel="noopener" style="color: var(--ai);">Hugging Face Space ↗</a>
+    &nbsp;|&nbsp;
     <strong>Project Repository:</strong> <a href="https://github.com/sarathdotgithub/Tesla-roadster-ai-brain" target="_blank" rel="noopener">github.com/sarathdotgithub/Tesla-roadster-ai-brain</a>
+  </p>
+  <p style="margin-top: 10px;">
+    <strong>Local LLM Setup:</strong> <a href="https://lnkd.in/eCVGkpgf" target="_blank" rel="noopener">lnkd.in/eCVGkpgf</a>
+    &nbsp;|&nbsp;
+    <strong>Physics Simulation:</strong> <a href="https://lnkd.in/e2d4vzqh" target="_blank" rel="noopener">lnkd.in/e2d4vzqh</a>
   </p>
   <p style="margin-top: 10px; font-size: 0.75rem; color: #4a5b6d;">
     Hero image: Tesla launch event coverage via Gigazine. Diagrams and animations are illustrative.<br>
